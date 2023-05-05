@@ -76,11 +76,11 @@ public class LoyaltyPointsHandler {
     public CustomerLoyaltyResponse getDiscountForCustomer(CustomerLoyaltyRequest request) throws Exception {
         String name;
         if (request.getFirstName() == null) {
-            name = request.getLastName();
+            name = request.getLastName().trim();
         } else if (request.getLastName() == null) {
-            name = request.getFirstName();
+            name = request.getFirstName().trim();
         } else {
-            name = request.getFirstName() + " " + request.getLastName();
+            name = request.getFirstName().trim() + " " + request.getLastName().trim();
         }
 
         Optional<CustomerLoyaltyEntity> customerLoyaltyEntityOptional = customerLoyaltyRepository.findByCustomerNameAndCustomerPhoneAndFirstByOrderByDiscountedDateDsc(name, request.getCustomerPhone());
@@ -101,6 +101,10 @@ public class LoyaltyPointsHandler {
         response.setPhoneNumber(request.getCustomerPhone());
 
         Double totalSaleAfterDate = saleRepository.findTotalSalesForCustomerAfterDate(name, lastDiscountedDate);
+
+        if (totalSaleAfterDate == null) {
+            totalSaleAfterDate = 0D;
+        }
 
         Optional<LoyaltyEntity> storeLoyaltyOptional = loyaltyRepository.findById(request.getStoreId());
         if (storeLoyaltyOptional.isEmpty()) {
