@@ -95,7 +95,7 @@ public class RepositoryHandler {
 
         for (StoreEntity store : existingStores.get()) {
             //TODO Update to query based on id
-            if (store.getPassword().equals(request.getPassword()) && store.getName().contains("DUMMY")) {
+            if (store.getPassword().equals(request.getPassword()) && store.getId().contains("DUMMY")) {
                 System.out.println("User logged in successfully");
                 return store;
             }

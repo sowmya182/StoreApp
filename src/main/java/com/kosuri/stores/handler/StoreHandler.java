@@ -40,7 +40,7 @@ public class StoreHandler {
         Optional<List<StoreEntity>> entity = storeRepository.findByOwnerEmail(emailId);
         if (entity.isPresent()) {
             for (StoreEntity store: entity.get()) {
-                if (store.getName().contains("DUMMY")) {
+                if (store.getId().contains("DUMMY")) {
                     continue;
                 }
                 return store.getId();
