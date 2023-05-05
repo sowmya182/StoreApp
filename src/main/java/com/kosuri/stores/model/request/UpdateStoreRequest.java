@@ -3,7 +3,6 @@ package com.kosuri.stores.model.request;
 import jakarta.validation.constraints.NotNull;
 
 public class UpdateStoreRequest {
-    @NotNull
     private String storeType;
     @NotNull
     private String id;
@@ -22,13 +21,10 @@ public class UpdateStoreRequest {
     private String town;
     @NotNull
     private String state;
-    @NotNull
     private String owner;
     private String ownerAddress;
-    @NotNull
     private String ownerContact;
     private String secondaryContact;
-    @NotNull
     private String ownerEmail;
 
     public String getStoreType() {

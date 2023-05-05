@@ -11,7 +11,6 @@ public class CreateStoreRequest extends RequestEntity<CreateStoreRequest> {
         super(method, url);
     }
 
-    @NotNull
     private String storeType;
     @NotNull
     private String id;
@@ -24,14 +23,10 @@ public class CreateStoreRequest extends RequestEntity<CreateStoreRequest> {
     private String town;
     @NotNull
     private String state;
-    @NotNull
     private String owner;
     private String ownerAddress;
-    @NotNull
     private String ownerContact;
-    @NotNull
     private String secondaryContact;
-    @NotNull
     private String ownerEmail;
 
     @NotNull
