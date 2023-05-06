@@ -2,18 +2,24 @@ package com.kosuri.stores.handler;
 
 import com.kosuri.stores.dao.PurchaseEntity;
 import com.kosuri.stores.dao.SaleEntity;
+import com.kosuri.stores.dao.StockEntity;
 import com.kosuri.stores.model.purchaseReport.PurchaseReportRecord;
 import com.kosuri.stores.model.purchaseReport.SaleReportRecord;
+import com.kosuri.stores.model.purchaseReport.StockRecord;
 import com.kosuri.stores.model.request.GeneratePurchaseReportRequest;
 import com.kosuri.stores.model.request.GenerateReportRequest;
 import com.kosuri.stores.model.request.GenerateSaleReportRequest;
+import com.kosuri.stores.model.request.GenerateStockReportRequest;
 import com.kosuri.stores.model.response.GeneratePurchaseReportResponse;
 import com.kosuri.stores.model.response.GenerateSaleReportResponse;
+import com.kosuri.stores.model.response.GenerateStockReportResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.*;
 
 @Service
@@ -118,6 +124,43 @@ public class ReportHandler {
         GenerateSaleReportResponse response = new GenerateSaleReportResponse();
         response.setSaleReport(purchaseReport);
 
+        return response;
+    }
+
+    public GenerateStockReportResponse generateStockReport(GenerateStockReportRequest request) throws Exception {
+        Optional<List<StockEntity>> stockRecords = repositoryHandler.getStockRecordsByStore(request.getStoreId());
+
+        if (!stockRecords.isPresent() || stockRecords.get().isEmpty()) {
+            throw new Exception("No records found for storeId");
+        }
+        List<StockRecord> stockReport = new ArrayList<>();
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH);
+
+        for (StockEntity stockEntity: stockRecords.get()) {
+            Instant instant = stockEntity.getUpdatedAt().toInstant(ZoneOffset.UTC);
+            Date entityDate = Date.from(instant);
+            if (validateRecord(request, entityDate) && validateVendorAndProduct(request, stockEntity.getSupplierName(), stockEntity.getItemCategory())) {
+                StockRecord record = new StockRecord();
+                record.setStoreId(stockEntity.getStoreId());
+                record.setDate(formatter.format(entityDate));
+                record.setVendorName(stockEntity.getSupplierName());
+                record.setProductType(stockEntity.getItemCategory());
+                record.setBatchNo(stockEntity.getBatch());
+                record.setExpiryDate(formatter.format(stockEntity.getExpiryDate()));
+                //record.setMfgDate(formatter.format(stockEntity.get()));
+                record.setMrp(stockEntity.getStockValueMrp());
+                record.setDiscount(stockEntity.getStockValueMrp() - stockEntity.getStockValuePurrate());
+                //record.setGst(stockEntity.getPu());
+                record.setPurchasePrice(stockEntity.getPurRatePerPackAfterGST());
+                record.setQtyInPack(stockEntity.getBalPackQuantity());
+                record.setQtyInLoose(stockEntity.getBalLooseQuantity());
+                record.setAmountAtPurchasePrice(stockEntity.getBalQuantity());
+
+                stockReport.add(record);
+            }
+        }
+        GenerateStockReportResponse response = new GenerateStockReportResponse();
+        response.setStockReport(stockReport);
         return response;
     }
 }

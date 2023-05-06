@@ -25,6 +25,9 @@ public class RepositoryHandler {
     @Autowired
     private RoleRepository roleRepository;
 
+    @Autowired
+    private StockRepository stockRepository;
+
     public StoreEntity addStoreToRepository(@Valid StoreEntity storeEntity) throws Exception {
         Optional<StoreEntity> store = storeRepository.findById(storeEntity.getId());
         boolean storeExistsByOwnerEmail = storeRepository.existsByOwnerEmail(storeEntity.getOwnerEmail());
@@ -69,6 +72,10 @@ public class RepositoryHandler {
 
     public Optional<List<SaleEntity>> getSaleRecordsByStore(String storeId){
         return saleRepository.findByStoreId(storeId);
+    }
+
+    public Optional<List<StockEntity>> getStockRecordsByStore(String storeId) {
+        return stockRepository.findByStoreId(storeId);
     }
 
     public boolean validateuser(AddUserRequest request) throws Exception{

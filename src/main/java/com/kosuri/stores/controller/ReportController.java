@@ -5,8 +5,10 @@ import com.kosuri.stores.handler.ReportHandler;
 import com.kosuri.stores.model.request.GeneratePurchaseReportRequest;
 import com.kosuri.stores.model.request.GenerateReportRequest;
 import com.kosuri.stores.model.request.GenerateSaleReportRequest;
+import com.kosuri.stores.model.request.GenerateStockReportRequest;
 import com.kosuri.stores.model.response.GeneratePurchaseReportResponse;
 import com.kosuri.stores.model.response.GenerateSaleReportResponse;
+import com.kosuri.stores.model.response.GenerateStockReportResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -45,6 +47,24 @@ public class ReportController {
         GenerateSaleReportResponse resp = new GenerateSaleReportResponse();
         try {
             resp = reportHandler.generateSaleReport(request);
+            httpStatus = HttpStatus.OK;
+        } catch (APIException e){
+            httpStatus = HttpStatus.BAD_REQUEST;
+            resp.setMsg(e.getMessage());
+        } catch (Exception e){
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+            resp.setMsg(e.getMessage());
+        }
+
+        return ResponseEntity.status(httpStatus).body(resp);
+    }
+
+    @PostMapping("/generate/stock")
+    public ResponseEntity<GenerateStockReportResponse> generateSaleReport(@Valid @RequestBody GenerateStockReportRequest request) throws Exception {
+        HttpStatus httpStatus;
+        GenerateStockReportResponse resp = new GenerateStockReportResponse();
+        try {
+            resp = reportHandler.generateStockReport(request);
             httpStatus = HttpStatus.OK;
         } catch (APIException e){
             httpStatus = HttpStatus.BAD_REQUEST;
