@@ -10,6 +10,7 @@ import com.kosuri.stores.model.response.CustomerLoyaltyResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -27,7 +28,13 @@ public class LoyaltyPointsHandler {
     @Autowired
     CustomerLoyaltyRepository customerLoyaltyRepository;
 
+    @Autowired
+    StoreRepository storeRepository;
     public ConfigureLoyaltyPointsResponse configureLoyaltyPoints(ConfigureLoyaltyPointsRequest request) throws Exception {
+        Optional<StoreEntity> store = storeRepository.findById(request.getStoreId());
+        if(!store.isPresent()){
+            throw new APIException("No store found for given id");
+        }
         LoyaltyEntity loyaltyEntity = new LoyaltyEntity();
         ConfigureLoyaltyPointsResponse response = new ConfigureLoyaltyPointsResponse();
 
@@ -51,6 +58,10 @@ public class LoyaltyPointsHandler {
     }
 
     public void redeemLoyaltyPointsForCustomer(RedeemLoyaltyPointsRequest request) throws Exception {
+        Optional<StoreEntity> store = storeRepository.findById(request.getStoreId());
+        if(!store.isPresent()){
+            throw new APIException("No store found for given id");
+        }
         CustomerLoyaltyEntity customerLoyaltyEntity = new CustomerLoyaltyEntity();
         if ((request.getFirstName() == null || request.getFirstName().isEmpty())
                 && (request.getLastName() == null || request.getLastName().isEmpty())
@@ -80,6 +91,10 @@ public class LoyaltyPointsHandler {
     }
 
     public CustomerLoyaltyResponse getDiscountForCustomer(CustomerLoyaltyRequest request) throws Exception {
+        Optional<StoreEntity> store = storeRepository.findById(request.getStoreId());
+        if(!store.isPresent()){
+            throw new APIException("No store found for given id");
+        }
         String name = null;
 
         if ((request.getFirstName() == null || request.getFirstName().isEmpty())

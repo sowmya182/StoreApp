@@ -41,6 +41,8 @@ public class PurchaseHandler {
             if (!ownerEmail.equals(emailId)) {
                 throw new APIException("User does not has access to upload file");
             }
+        } else {
+            throw new APIException("Store not found for givern store id");
         }
             List<PurchaseEntity> purchaseArrayList = new ArrayList<PurchaseEntity>();
         XSSFWorkbook workbook = new XSSFWorkbook(reapExcelDataFile.getInputStream());

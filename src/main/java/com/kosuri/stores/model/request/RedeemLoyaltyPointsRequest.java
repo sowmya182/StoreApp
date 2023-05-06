@@ -17,6 +17,7 @@ public class RedeemLoyaltyPointsRequest {
 
     private Integer loyaltyPoints;
 
+    @NotNull
     private String storeId;
 
     public String getStoreId() {

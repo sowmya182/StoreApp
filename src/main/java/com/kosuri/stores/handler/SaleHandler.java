@@ -37,6 +37,8 @@ public class SaleHandler {
             if (!ownerEmail.equals(emailId)) {
                 throw new APIException("User does not has access to upload file");
             }
+        } else {
+            throw new APIException("Store not found for given id");
         }
 
         List<SaleEntity> saleArrayList = new ArrayList<SaleEntity>();
