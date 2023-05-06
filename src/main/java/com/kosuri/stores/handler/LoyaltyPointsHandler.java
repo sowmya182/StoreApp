@@ -52,14 +52,20 @@ public class LoyaltyPointsHandler {
 
     public void redeemLoyaltyPointsForCustomer(RedeemLoyaltyPointsRequest request) throws Exception {
         CustomerLoyaltyEntity customerLoyaltyEntity = new CustomerLoyaltyEntity();
+        if ((request.getFirstName() == null || request.getFirstName().isEmpty())
+                && (request.getLastName() == null || request.getLastName().isEmpty())
+                && (request.getCustomerPhone() == null || request.getCustomerPhone().isEmpty())) {
+            throw new APIException("Please input customer name or phone no");
+        }
 
-        String name;
-        if (request.getFirstName() == null) {
-            name = request.getLastName();
-        } else if (request.getLastName() == null) {
-            name = request.getFirstName();
-        } else {
-            name = request.getFirstName() + " " + request.getLastName();
+
+        String name = null;
+        if (request.getFirstName() == null && request.getLastName() != null) {
+            name = request.getLastName().trim();
+        } else if (request.getLastName() == null && request.getFirstName() != null) {
+            name = request.getFirstName().trim();
+        } else if (request.getLastName() != null && request.getFirstName() != null){
+            name = request.getFirstName().trim() + " " + request.getLastName().trim();
         }
 
         customerLoyaltyEntity.setLoyaltyPoints(request.getLoyaltyPoints());
@@ -74,16 +80,36 @@ public class LoyaltyPointsHandler {
     }
 
     public CustomerLoyaltyResponse getDiscountForCustomer(CustomerLoyaltyRequest request) throws Exception {
-        String name;
-        if (request.getFirstName() == null) {
+        String name = null;
+
+        if ((request.getFirstName() == null || request.getFirstName().isEmpty())
+                && (request.getLastName() == null || request.getLastName().isEmpty())
+                && (request.getCustomerPhone() == null || request.getCustomerPhone().isEmpty())) {
+            throw new APIException("Please input customer name or phone no");
+        }
+
+        if (request.getFirstName() == null && request.getLastName() != null) {
             name = request.getLastName().trim();
-        } else if (request.getLastName() == null) {
+        } else if (request.getLastName() == null && request.getFirstName() != null) {
             name = request.getFirstName().trim();
-        } else {
+        } else if (request.getLastName() != null && request.getFirstName() != null){
             name = request.getFirstName().trim() + " " + request.getLastName().trim();
         }
 
-        Optional<CustomerLoyaltyEntity> customerLoyaltyEntityOptional = customerLoyaltyRepository.findByCustomerNameAndCustomerPhoneAndFirstByOrderByDiscountedDateDsc(name, request.getCustomerPhone());
+        if(name.trim().isEmpty()){
+            name = null;
+        }
+
+        if (request.getCustomerPhone().isEmpty()) {
+            request.setCustomerPhone(null);
+        }
+
+        Optional<CustomerLoyaltyEntity> customerLoyaltyEntityOptional;
+        if(request.getCustomerPhone() != null &&  name != null) {
+            customerLoyaltyEntityOptional = customerLoyaltyRepository.findByCustomerNameAndCustomerPhoneAndFirstByOrderByDiscountedDateDsc(name, request.getCustomerPhone());
+        }else{
+            customerLoyaltyEntityOptional = customerLoyaltyRepository.findByCustomerNameOrCustomerPhoneAndFirstByOrderByDiscountedDateDsc(name, request.getCustomerPhone());
+        }
 
         Date lastDiscountedDate;
 
@@ -100,7 +126,12 @@ public class LoyaltyPointsHandler {
         response.setLastName(request.getLastName());
         response.setPhoneNumber(request.getCustomerPhone());
 
-        Double totalSaleAfterDate = saleRepository.findTotalSalesForCustomerAfterDate(name, lastDiscountedDate);
+        Double totalSaleAfterDate;
+        if(request.getCustomerPhone() != null &&  name != null) {
+            totalSaleAfterDate = saleRepository.findTotalSalesForCustomerPhoneAndNameAfterDate(request.getCustomerPhone(), name, lastDiscountedDate);
+        }else{
+            totalSaleAfterDate = saleRepository.findTotalSalesForCustomerPhoneOrNameAfterDate(request.getCustomerPhone(), name, lastDiscountedDate);
+        }
 
         if (totalSaleAfterDate == null) {
             totalSaleAfterDate = 0D;

@@ -1,13 +1,16 @@
 package com.kosuri.stores.model.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CustomerLoyaltyResponse extends GenericResponse {
     private String firstName;
     private String lastName;
     private String phoneNumber;
-    private Double totalSalesVolume = 0D;
+    private Double totalSalesVolume;
 
-    private Integer loyaltyPoints = 0;
-    private Double discountEligible = 0D;
+    private Integer loyaltyPoints;
+    private Double discountEligible;
 
     public String getFirstName() {
         return firstName;
