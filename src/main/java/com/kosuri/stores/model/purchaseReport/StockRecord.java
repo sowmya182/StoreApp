@@ -1,59 +1,112 @@
 package com.kosuri.stores.model.purchaseReport;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Id;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+
+import java.time.LocalDateTime;
+import java.util.Date;
+
 public class StockRecord {
-    private String vendorName;
-    private String date;
-    private String productType;
-    private String storeId;
-    private String batchNo;
+    private String manufacturer;
+
+    private String mfName;
+
+    private String itemCode;
+
+    private String itemName;
+
+    private String supplierName;
+
+    private String rack;
+
+    private String batch;
+
     private String expiryDate;
-    private String mfgDate;
-    private Double mrp;
-    private Double discount;
-    private Double gst;
-    private Double purchasePrice;
-    private Double qtyInPack;
-    private Double qtyInLoose;
-    private Double amountAtPurchasePrice;
 
-    public String getVendorName() {
-        return vendorName;
+    private Double balQuantity;
+
+    private Double balPackQuantity;
+
+    private Double balLooseQuantity;
+
+    private String total;
+
+    private Double mrpPack;
+
+    private Double purRatePerPackAfterGST;
+
+    private Double mrpValue;
+
+    private String itemCategory;
+
+    private String onlineYesNo;
+
+    private String storeId;
+
+    private Double stockValueMrp;
+
+    private Double stockValuePurrate;
+
+    private String updatedBy;
+
+    private String updatedAt;
+
+    public String getManufacturer() {
+        return manufacturer;
     }
 
-    public void setVendorName(String vendorName) {
-        this.vendorName = vendorName;
+    public void setManufacturer(String manufacturer) {
+        this.manufacturer = manufacturer;
     }
 
-    public String getDate() {
-        return date;
+    public String getMfName() {
+        return mfName;
     }
 
-    public void setDate(String date) {
-        this.date = date;
+    public void setMfName(String mfName) {
+        this.mfName = mfName;
     }
 
-    public String getProductType() {
-        return productType;
+    public String getItemCode() {
+        return itemCode;
     }
 
-    public void setProductType(String productType) {
-        this.productType = productType;
+    public void setItemCode(String itemCode) {
+        this.itemCode = itemCode;
     }
 
-    public String getStoreId() {
-        return storeId;
+    public String getItemName() {
+        return itemName;
     }
 
-    public void setStoreId(String storeId) {
-        this.storeId = storeId;
+    public void setItemName(String itemName) {
+        this.itemName = itemName;
     }
 
-    public String getBatchNo() {
-        return batchNo;
+    public String getSupplierName() {
+        return supplierName;
     }
 
-    public void setBatchNo(String batchNo) {
-        this.batchNo = batchNo;
+    public void setSupplierName(String supplierName) {
+        this.supplierName = supplierName;
+    }
+
+    public String getRack() {
+        return rack;
+    }
+
+    public void setRack(String rack) {
+        this.rack = rack;
+    }
+
+    public String getBatch() {
+        return batch;
+    }
+
+    public void setBatch(String batch) {
+        this.batch = batch;
     }
 
     public String getExpiryDate() {
@@ -64,67 +117,115 @@ public class StockRecord {
         this.expiryDate = expiryDate;
     }
 
-    public String getMfgDate() {
-        return mfgDate;
+    public Double getBalQuantity() {
+        return balQuantity;
     }
 
-    public void setMfgDate(String mfgDate) {
-        this.mfgDate = mfgDate;
+    public void setBalQuantity(Double balQuantity) {
+        this.balQuantity = balQuantity;
     }
 
-    public Double getMrp() {
-        return mrp;
+    public Double getBalPackQuantity() {
+        return balPackQuantity;
     }
 
-    public void setMrp(Double mrp) {
-        this.mrp = mrp;
+    public void setBalPackQuantity(Double balPackQuantity) {
+        this.balPackQuantity = balPackQuantity;
     }
 
-    public Double getDiscount() {
-        return discount;
+    public Double getBalLooseQuantity() {
+        return balLooseQuantity;
     }
 
-    public void setDiscount(Double discount) {
-        this.discount = discount;
+    public void setBalLooseQuantity(Double balLooseQuantity) {
+        this.balLooseQuantity = balLooseQuantity;
     }
 
-    public Double getGst() {
-        return gst;
+    public String getTotal() {
+        return total;
     }
 
-    public void setGst(Double gst) {
-        this.gst = gst;
+    public void setTotal(String total) {
+        this.total = total;
     }
 
-    public Double getPurchasePrice() {
-        return purchasePrice;
+    public Double getMrpPack() {
+        return mrpPack;
     }
 
-    public void setPurchasePrice(Double purchasePrice) {
-        this.purchasePrice = purchasePrice;
+    public void setMrpPack(Double mrpPack) {
+        this.mrpPack = mrpPack;
     }
 
-    public Double getQtyInPack() {
-        return qtyInPack;
+    public Double getPurRatePerPackAfterGST() {
+        return purRatePerPackAfterGST;
     }
 
-    public void setQtyInPack(Double qtyInPack) {
-        this.qtyInPack = qtyInPack;
+    public void setPurRatePerPackAfterGST(Double purRatePerPackAfterGST) {
+        this.purRatePerPackAfterGST = purRatePerPackAfterGST;
     }
 
-    public Double getQtyInLoose() {
-        return qtyInLoose;
+    public Double getMrpValue() {
+        return mrpValue;
     }
 
-    public void setQtyInLoose(Double qtyInLoose) {
-        this.qtyInLoose = qtyInLoose;
+    public void setMrpValue(Double mrpValue) {
+        this.mrpValue = mrpValue;
     }
 
-    public Double getAmountAtPurchasePrice() {
-        return amountAtPurchasePrice;
+    public String getItemCategory() {
+        return itemCategory;
     }
 
-    public void setAmountAtPurchasePrice(Double amountAtPurchasePrice) {
-        this.amountAtPurchasePrice = amountAtPurchasePrice;
+    public void setItemCategory(String itemCategory) {
+        this.itemCategory = itemCategory;
+    }
+
+    public String getOnlineYesNo() {
+        return onlineYesNo;
+    }
+
+    public void setOnlineYesNo(String onlineYesNo) {
+        this.onlineYesNo = onlineYesNo;
+    }
+
+    public String getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(String storeId) {
+        this.storeId = storeId;
+    }
+
+    public Double getStockValueMrp() {
+        return stockValueMrp;
+    }
+
+    public void setStockValueMrp(Double stockValueMrp) {
+        this.stockValueMrp = stockValueMrp;
+    }
+
+    public Double getStockValuePurrate() {
+        return stockValuePurrate;
+    }
+
+    public void setStockValuePurrate(Double stockValuePurrate) {
+        this.stockValuePurrate = stockValuePurrate;
+    }
+
+    public String getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(String updatedBy) {
+        this.updatedBy = updatedBy;
+    }
+
+    public String getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(String updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }
