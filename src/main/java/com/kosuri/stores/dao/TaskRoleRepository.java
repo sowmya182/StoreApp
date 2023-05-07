@@ -7,6 +7,6 @@ import java.util.List;
 
 
 @Repository
-public interface TaskRoleRepository  extends JpaRepository<TaskRoleEntity, Integer> {
-    List<TaskRoleEntity> findByRoleId(Integer roleId);
+public interface TaskRoleRepository  extends JpaRepository<TaskRoleEntity, TaskRoleId> {
+    List<TaskRoleEntity> findByRoleId(String  roleId);
 }

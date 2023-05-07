@@ -17,7 +17,7 @@ public class TaskRoleEntity {
 
     @Column(name="RoleId",nullable = true, length = 45)
     @Id
-    private Integer roleId;
+    private String roleId;
 
 
     @Column(name="Updated_Date",nullable = true, length = 45)
@@ -47,12 +47,11 @@ public class TaskRoleEntity {
         this.updatedBy = updatedBy;
     }
 
-
-    public Integer getRoleId() {
+    public String getRoleId() {
         return roleId;
     }
 
-    public void setRoleId(Integer roleId) {
+    public void setRoleId(String roleId) {
         this.roleId = roleId;
     }
 

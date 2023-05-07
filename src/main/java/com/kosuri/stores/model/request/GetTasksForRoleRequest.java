@@ -1,13 +1,13 @@
 package com.kosuri.stores.model.request;
 
 public class GetTasksForRoleRequest {
-    public Integer getRoleId() {
+    private String roleId;
+
+    public String getRoleId() {
         return roleId;
     }
 
-    public void setRoleId(Integer roleId) {
+    public void setRoleId(String roleId) {
         this.roleId = roleId;
     }
-
-    private Integer roleId;
 }
