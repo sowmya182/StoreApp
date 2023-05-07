@@ -164,7 +164,7 @@ public class LoyaltyPointsHandler {
         Double totalDiscountAmount = 0D;
 
         if (pointsEarned > storeLoyalty.getMinLoyaltyPoints()) {
-            totalDiscPercentage = storeLoyalty.getFixedDiscountPercentage() * (pointsEarned / 100);
+            totalDiscPercentage = storeLoyalty.getFixedDiscountPercentage();
             totalDiscountAmount = (totalDiscPercentage * totalSaleAfterDate)/100;
         }
 
