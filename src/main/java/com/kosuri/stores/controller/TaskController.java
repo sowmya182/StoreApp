@@ -1,10 +1,13 @@
 package com.kosuri.stores.controller;
 
 import com.kosuri.stores.dao.TaskEntity;
+import com.kosuri.stores.exception.APIException;
 import com.kosuri.stores.handler.RepositoryHandler;
 import com.kosuri.stores.handler.TaskHandler;
+import com.kosuri.stores.model.request.AddTaskRequest;
 import com.kosuri.stores.model.request.GetTasksForRoleRequest;
 import com.kosuri.stores.model.request.MapTaskForRoleRequest;
+import com.kosuri.stores.model.response.AddTaskResponse;
 import com.kosuri.stores.model.response.GetAllTasksResponse;
 import com.kosuri.stores.model.response.GetTasksForRoleResponse;
 import jakarta.validation.Valid;
@@ -37,6 +40,21 @@ public class TaskController {
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {
             response.setResponseMessage(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @PostMapping("/add")
+    public ResponseEntity<AddTaskResponse> addTask(@Valid @RequestBody AddTaskRequest request){
+        AddTaskResponse response = new AddTaskResponse();
+        try {
+            response = taskHandler.addTask(request);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (APIException e){
+            response.setMsg(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        } catch (Exception e) {
+            response.setMsg(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
