@@ -29,7 +29,7 @@ public class SearchHandler {
         Optional<List<StoreEntity>> storeList = storeRepository.findByLocationContaining(location);
         if (storeList.isPresent()) {
             for (StoreEntity storeEntity : storeList.get()) {
-                if (storeEntity.getName().equals("DUMMY")) {
+                if (storeEntity.getId().contains("DUMMY")) {
                     continue;
                 }
                 List<StockEntity> availableStockEntity = stockRepository.findByItemNameContainingAndStoreIdAndItemCategoryAndBalQuantityGreaterThan(medicine,
