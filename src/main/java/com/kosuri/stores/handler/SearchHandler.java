@@ -27,13 +27,13 @@ public class SearchHandler {
         List<SearchResult> searchResultList = new ArrayList<>();
 
         Optional<List<StoreEntity>> storeList = storeRepository.findByLocationContaining(location);
-        if (storeList.isPresent()) {
+        if (storeList.isPresent() && category.equalsIgnoreCase("medicine")) {
             for (StoreEntity storeEntity : storeList.get()) {
                 if (storeEntity.getId().contains("DUMMY")) {
                     continue;
                 }
-                List<StockEntity> availableStockEntity = stockRepository.findByItemNameContainingAndStoreIdAndItemCategoryAndBalQuantityGreaterThan(medicine,
-                        storeEntity.getId(), category, 0D);
+                List<StockEntity> availableStockEntity = stockRepository.findByItemNameContainingAndStoreIdAndBalQuantityGreaterThan(medicine,
+                        storeEntity.getId(), 0D);
 
                 for (StockEntity stockEntity : availableStockEntity) {
                     SearchResult searchResult = new SearchResult();
