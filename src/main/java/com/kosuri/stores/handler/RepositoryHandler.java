@@ -85,7 +85,7 @@ public class RepositoryHandler {
         }
         for (StoreEntity store: existingStores.get()){
             //TODO Update to query based on id
-            if (store.getName().contains("DUMMY")){
+            if (store.getId().contains("DUMMY")){
                 System.out.println("User already exists in system");
                 throw new APIException("User already exists in system");
             }
