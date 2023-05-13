@@ -1,15 +1,18 @@
 package com.kosuri.stores.model.response;
 
+import java.util.List;
+
 public class LoginUserResponse extends GenericResponse {
     private String roleName;
     private String roleId;
 
-    private String storeId;
+    private List<String> storeId;
 
-    public String getStoreId() {
+    public List<String> getStoreId() {
         return storeId;
     }
-    public void setStoreId(String storeId) {
+
+    public void setStoreId(List<String> storeId) {
         this.storeId = storeId;
     }
 

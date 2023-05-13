@@ -10,6 +10,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class UserHandler {
@@ -43,11 +45,23 @@ public class UserHandler {
         }
 
         StoreEntity storeEntity = repositoryHandler.loginUser(request);
-        String storeId = storeHandler.getStoreIdFromStoreOwner(request.getEmail());
-        String roleId = roleHandler.getRoleIdFromRoleName(storeEntity.getRole());
-        response.setRoleName(storeEntity.getRole());
-        response.setRoleId(roleId);
-        response.setStoreId(storeId);
+        List<String> stores = new ArrayList<>();
+        if(storeEntity.getRole().equals("STORE_MANAGER")){
+            String storeId = storeHandler.getStoreIdFromStoreOwner(request.getEmail());
+            String roleId = roleHandler.getRoleIdFromRoleName(storeEntity.getRole());
+            stores.add(storeId);
+            response.setRoleName(storeEntity.getRole());
+            response.setRoleId(roleId);
+            response.setStoreId(stores);
+        } else {
+            List<String> storeIds = storeHandler.getStoreIdFromLocation(storeEntity.getLocation());
+            String roleId = roleHandler.getRoleIdFromRoleName(storeEntity.getRole());
+            stores.addAll(storeIds);
+            response.setRoleName(storeEntity.getRole());
+            response.setRoleId(roleId);
+            response.setStoreId(stores);
+        }
+
         return response;
     }
 

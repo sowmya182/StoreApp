@@ -49,6 +49,20 @@ public class StoreHandler {
         return "";
     }
 
+    public List<String> getStoreIdFromLocation(String location) {
+        Optional<List<StoreEntity>> entity = storeRepository.findByLocationContaining(location);
+        List<String> stores = new ArrayList<>();
+        if (entity.isPresent()) {
+            for (StoreEntity store: entity.get()) {
+                if (store.getId().contains("DUMMY")) {
+                    continue;
+                }
+                stores.add(store.getId());
+            }
+        }
+        return stores;
+    }
+
     public List<StoreEntity> getAllStores() throws Exception{
         List<StoreEntity> storeEntities = repositoryHandler.getAllStores();
 
