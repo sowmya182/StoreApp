@@ -41,6 +41,8 @@ public class SearchHandler {
                     searchResult.setMrp(stockEntity.getMrpPack());
                     searchResult.setShopLocation(storeEntity.getLocation());
                     searchResult.setShopName(storeEntity.getName());
+                    searchResult.setBatchNo(stockEntity.getBatch());
+                    searchResult.setExpiryDate(stockEntity.getExpiryDate());
 
                     searchResultList.add(searchResult);
                 }
