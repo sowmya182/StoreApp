@@ -4,6 +4,7 @@ import com.kosuri.stores.exception.APIException;
 import com.kosuri.stores.handler.UserHandler;
 import com.kosuri.stores.model.request.AddUserRequest;
 import com.kosuri.stores.model.request.LoginUserRequest;
+import com.kosuri.stores.model.response.GenericResponse;
 import com.kosuri.stores.model.response.LoginUserResponse;
 import jakarta.validation.Valid;
 import org.apache.catalina.User;
@@ -21,22 +22,22 @@ public class UserController {
     @Autowired
     UserHandler userHandler;
     @PostMapping("/add")
-    public ResponseEntity<?> addUser(@Valid @RequestBody AddUserRequest request) {
+    public ResponseEntity<GenericResponse> addUser(@Valid @RequestBody AddUserRequest request) {
         HttpStatus httpStatus;
-        String body;
+        GenericResponse response = new GenericResponse();
         try {
             userHandler.addUser(request);
             httpStatus = HttpStatus.OK;
-            body = "User added successfully";
+            response.setResponseMessage("User added successfully");
         } catch (APIException e) {
             httpStatus = HttpStatus.BAD_REQUEST;
-            body = e.getMessage();
+            response.setResponseMessage(e.getMessage());
         } catch (Exception e) {
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-            body = e.getMessage();
+            response.setResponseMessage(e.getMessage());
         }
 
-        return new ResponseEntity<>(body, httpStatus);
+        return ResponseEntity.status(httpStatus).body(response);
     }
 
     @PostMapping("/login")
