@@ -1,5 +1,6 @@
 package com.kosuri.stores.model.response;
 
+import com.kosuri.stores.dao.StockEntity;
 import com.kosuri.stores.model.purchaseReport.StockRecord;
 
 import java.util.List;

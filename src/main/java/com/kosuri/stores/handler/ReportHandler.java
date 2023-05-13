@@ -141,20 +141,28 @@ public class ReportHandler {
             Date entityDate = Date.from(instant);
             if (validateRecord(request, entityDate) && validateVendorAndProduct(request, stockEntity.getSupplierName(), stockEntity.getItemCategory())) {
                 StockRecord record = new StockRecord();
-                record.setStoreId(stockEntity.getStoreId());
-                record.setDate(formatter.format(entityDate));
-                record.setVendorName(stockEntity.getSupplierName());
-                record.setProductType(stockEntity.getItemCategory());
-                record.setBatchNo(stockEntity.getBatch());
+                record.setStoreId(request.getStoreId());
+                record.setManufacturer(stockEntity.getManufacturer());
+                record.setMfName(stockEntity.getMfName());
+                record.setItemCode(stockEntity.getItemCode());
+                record.setItemName(stockEntity.getItemName());
+                record.setSupplierName(stockEntity.getSupplierName());
+                record.setRack(stockEntity.getRack());
+                record.setBatch(stockEntity.getBatch());
                 record.setExpiryDate(formatter.format(stockEntity.getExpiryDate()));
-                //record.setMfgDate(formatter.format(stockEntity.get()));
-                record.setMrp(stockEntity.getStockValueMrp());
-                record.setDiscount(stockEntity.getStockValueMrp() - stockEntity.getStockValuePurrate());
-                //record.setGst(stockEntity.getPu());
-                record.setPurchasePrice(stockEntity.getPurRatePerPackAfterGST());
-                record.setQtyInPack(stockEntity.getBalPackQuantity());
-                record.setQtyInLoose(stockEntity.getBalLooseQuantity());
-                record.setAmountAtPurchasePrice(stockEntity.getBalQuantity());
+                record.setBalQuantity(stockEntity.getBalQuantity());
+                record.setBalPackQuantity(stockEntity.getBalPackQuantity());
+                record.setBalLooseQuantity(stockEntity.getBalLooseQuantity());
+                record.setTotal(stockEntity.getTotal());
+                record.setMrpPack(stockEntity.getMrpPack());
+                record.setPurRatePerPackAfterGST(stockEntity.getPurRatePerPackAfterGST());
+                record.setMrpValue(stockEntity.getMrpValue());
+                record.setItemCategory(stockEntity.getItemCategory());
+                record.setOnlineYesNo(stockEntity.getOnlineYesNo());
+                record.setStockValueMrp(stockEntity.getStockValueMrp());
+                record.setStockValuePurrate(stockEntity.getStockValuePurrate());
+                record.setUpdatedBy(stockEntity.getUpdatedBy());
+                record.setUpdatedAt(formatter.format(entityDate));
 
                 stockReport.add(record);
             }

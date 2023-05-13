@@ -5,15 +5,18 @@ import java.util.List;
 
 
 public class MapTaskForRoleRequest {
-    private Integer roleId;
+    private String roleId;
     private String updatedBy;
     private List<Integer>taskIds;
-    public Integer getRoleId() {
+
+    public String getRoleId() {
         return roleId;
     }
-    public void setRoleId(Integer roleId) {
+
+    public void setRoleId(String roleId) {
         this.roleId = roleId;
     }
+
     public String getUpdatedBy() {
         return updatedBy;
     }

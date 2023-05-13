@@ -6,8 +6,11 @@ import com.kosuri.stores.dao.TaskRepository;
 import com.kosuri.stores.dao.TaskRoleEntity;
 import com.kosuri.stores.dao.TaskRoleRepository;
 import com.kosuri.stores.exception.APIException;
+import com.kosuri.stores.model.request.AddTaskRequest;
+import com.kosuri.stores.model.request.AddUserRequest;
 import com.kosuri.stores.model.request.GetTasksForRoleRequest;
 import com.kosuri.stores.model.request.MapTaskForRoleRequest;
+import com.kosuri.stores.model.response.AddTaskResponse;
 import com.kosuri.stores.model.response.GetAllTasksResponse;
 import com.kosuri.stores.model.response.GetTasksForRoleResponse;
 import com.kosuri.stores.model.role.Task;
@@ -36,6 +39,21 @@ public class TaskHandler {
         List<TaskEntity> taskList = new ArrayList<TaskEntity>();
         taskRepository.findAll().forEach(task -> taskList.add(task));
         response.setTaskList(taskList);
+        return response;
+    }
+
+    public AddTaskResponse addTask(AddTaskRequest request) throws Exception {
+        AddTaskResponse response = new AddTaskResponse();
+        if(taskRepository.findById(request.getTaskId()).isPresent() || taskRepository.findByTaskName(request.getTaskName()).isPresent()){
+            throw new APIException("Task with id/name already exists");
+        }
+        TaskEntity task = new TaskEntity();
+        task.setTaskId(request.getTaskId());
+        task.setTaskName(request.getTaskName());
+
+        taskRepository.save(task);
+        response.setTaskId(task.getTaskId());
+        response.setMsg("Task added successfully");
         return response;
     }
 
