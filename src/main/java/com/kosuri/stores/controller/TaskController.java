@@ -5,6 +5,7 @@ import com.kosuri.stores.handler.RepositoryHandler;
 import com.kosuri.stores.handler.TaskHandler;
 import com.kosuri.stores.model.request.GetTasksForRoleRequest;
 import com.kosuri.stores.model.request.MapTaskForRoleRequest;
+import com.kosuri.stores.model.response.GenericResponse;
 import com.kosuri.stores.model.response.GetAllTasksResponse;
 import com.kosuri.stores.model.response.GetTasksForRoleResponse;
 import jakarta.validation.Valid;
@@ -42,12 +43,15 @@ public class TaskController {
     }
 
     @PostMapping("/map")
-    public ResponseEntity<Object> mapTaskRoleEntityFromRequest(@Valid @RequestBody MapTaskForRoleRequest request) {
+    public ResponseEntity<GenericResponse> mapTaskRoleEntityFromRequest(@Valid @RequestBody MapTaskForRoleRequest request) {
+        GenericResponse response = new GenericResponse();
         try {
             taskHandler.mapTaskRoleEntityFromRequest(request);
-            return ResponseEntity.status(HttpStatus.OK).body("Mapped successfully!");
+            response.setResponseMessage("Mapped successfully!");
+            return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            response.setResponseMessage(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 

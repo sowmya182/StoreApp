@@ -5,6 +5,7 @@ import com.kosuri.stores.handler.RoleHandler;
 import com.kosuri.stores.handler.TaskHandler;
 import com.kosuri.stores.model.request.CreateRoleRequest;
 import com.kosuri.stores.model.request.GetTasksForRoleRequest;
+import com.kosuri.stores.model.response.GenericResponse;
 import com.kosuri.stores.model.response.GetAllRolesResponse;
 import com.kosuri.stores.model.response.GetTasksForRoleResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,12 +29,15 @@ public class RoleController {
     private TaskHandler taskHandler;
 
     @PostMapping("/add")
-    public ResponseEntity<Object> createRoleEntityFromRequest(@Valid @RequestBody CreateRoleRequest request) {
+    public ResponseEntity<GenericResponse> createRoleEntityFromRequest(@Valid @RequestBody CreateRoleRequest request) {
+        GenericResponse response = new GenericResponse();
         try {
             roleHandler.createRoleEntityFromRequest(request.getRoleId(),request.getRoleName());
-            return ResponseEntity.status(HttpStatus.OK).body("Role created successfully!");
+            response.setResponseMessage("Role created successfully!");
+            return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            response.setResponseMessage(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
