@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import javax.swing.text.html.Option;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -90,7 +92,7 @@ public class LoyaltyPointsHandler {
         customerLoyaltyRepository.save(customerLoyaltyEntity);
     }
 
-    public CustomerLoyaltyResponse getDiscountForCustomer(CustomerLoyaltyRequest request) throws Exception {
+    public List<CustomerLoyaltyResponse> getDiscountForCustomer(CustomerLoyaltyRequest request) throws Exception {
         Optional<StoreEntity> store = storeRepository.findById(request.getStoreId());
         if(!store.isPresent()){
             throw new APIException("No store found for given id");
@@ -109,6 +111,10 @@ public class LoyaltyPointsHandler {
             name = request.getFirstName().trim();
         } else if (request.getLastName() != null && request.getFirstName() != null){
             name = request.getFirstName().trim() + " " + request.getLastName().trim();
+        }
+
+        if (name != null) {
+            name = name.trim();
         }
 
         if(name.trim().isEmpty()){
@@ -135,23 +141,7 @@ public class LoyaltyPointsHandler {
             String dateInString = "1-Jan-1800";
             lastDiscountedDate = formatter.parse(dateInString);
         }
-
-        CustomerLoyaltyResponse response = new CustomerLoyaltyResponse();
-        response.setFirstName(request.getFirstName());
-        response.setLastName(request.getLastName());
-        response.setPhoneNumber(request.getCustomerPhone());
-
-        Double totalSaleAfterDate;
-        if(request.getCustomerPhone() != null &&  name != null) {
-            totalSaleAfterDate = saleRepository.findTotalSalesForCustomerPhoneAndNameAfterDate(request.getCustomerPhone(), name, lastDiscountedDate);
-        }else{
-            totalSaleAfterDate = saleRepository.findTotalSalesForCustomerPhoneOrNameAfterDate(request.getCustomerPhone(), name, lastDiscountedDate);
-        }
-
-        if (totalSaleAfterDate == null) {
-            totalSaleAfterDate = 0D;
-        }
-
+        
         Optional<LoyaltyEntity> storeLoyaltyOptional = loyaltyRepository.findById(request.getStoreId());
         if (storeLoyaltyOptional.isEmpty()) {
             throw new APIException("No loyalty points configured for this store");
@@ -159,20 +149,41 @@ public class LoyaltyPointsHandler {
 
         LoyaltyEntity storeLoyalty = storeLoyaltyOptional.get();
 
-        Long pointsEarned = Math.round((totalSaleAfterDate / storeLoyalty.getSalesVolume()) * storeLoyalty.getLoyaltyPoints());
-        Double totalDiscPercentage = 0D;
-        Double totalDiscountAmount = 0D;
+        List<CustomerLoyaltyResponse> responseList = new ArrayList<CustomerLoyaltyResponse>();
+        List<Object[]> saleRecords;
 
-        if (pointsEarned > storeLoyalty.getMinLoyaltyPoints()) {
-            totalDiscPercentage = storeLoyalty.getFixedDiscountPercentage();
-            totalDiscountAmount = (totalDiscPercentage * totalSaleAfterDate)/100;
+        Double totalSaleAfterDate;
+        if(request.getCustomerPhone() != null &&  name != null) {
+            saleRecords = saleRepository.findTotalSalesForCustomerPhoneAndNameAfterDate(request.getCustomerPhone(), name, lastDiscountedDate);
+        } else {
+            saleRecords = saleRepository.findTotalSalesForCustomerPhoneOrNameAfterDate(request.getCustomerPhone(), name, lastDiscountedDate);
         }
 
-        response.setLoyaltyPoints(pointsEarned.intValue());
-        response.setDiscountEligible(totalDiscountAmount);
-        response.setTotalSalesVolume(totalSaleAfterDate);
+        for (Object[] obj: saleRecords) {
+            CustomerLoyaltyResponse response = new CustomerLoyaltyResponse();
+            response.setFirstName(request.getFirstName());
+            response.setLastName(request.getLastName());
+            response.setPhoneNumber((String)obj[1]);
+            totalSaleAfterDate = (Double)obj[0];
+            if (totalSaleAfterDate == null) {
+                totalSaleAfterDate = 0D;
+            }
+            
+            Long pointsEarned = Math.round((totalSaleAfterDate / storeLoyalty.getSalesVolume()) * storeLoyalty.getLoyaltyPoints());
+            Double totalDiscPercentage = 0D;
+            Double totalDiscountAmount = 0D;
 
+            if (pointsEarned > storeLoyalty.getMinLoyaltyPoints()) {
+                totalDiscPercentage = storeLoyalty.getFixedDiscountPercentage();
+                totalDiscountAmount = (totalDiscPercentage * totalSaleAfterDate)/100;
+            }
 
-        return response;
+            response.setLoyaltyPoints(pointsEarned.intValue());
+            response.setDiscountEligible(totalDiscountAmount);
+            response.setTotalSalesVolume(totalSaleAfterDate);
+            responseList.add(response);
+        }
+
+        return responseList;
     }
 }
