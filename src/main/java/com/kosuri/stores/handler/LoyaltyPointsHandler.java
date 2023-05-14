@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import javax.swing.text.html.Option;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -79,6 +81,10 @@ public class LoyaltyPointsHandler {
             name = request.getFirstName().trim() + " " + request.getLastName().trim();
         }
 
+        if (name != null) {
+            name = name.trim();
+        }
+
         customerLoyaltyEntity.setLoyaltyPoints(request.getLoyaltyPoints());
         customerLoyaltyEntity.setCustomerName(name);
         customerLoyaltyEntity.setCustomerPhone(request.getCustomerPhone());
@@ -90,11 +96,20 @@ public class LoyaltyPointsHandler {
         customerLoyaltyRepository.save(customerLoyaltyEntity);
     }
 
-    public CustomerLoyaltyResponse getDiscountForCustomer(CustomerLoyaltyRequest request) throws Exception {
+    public List<CustomerLoyaltyResponse> getDiscountForCustomer(CustomerLoyaltyRequest request) throws Exception {
         Optional<StoreEntity> store = storeRepository.findById(request.getStoreId());
+        List<CustomerLoyaltyResponse> responseList = new ArrayList<CustomerLoyaltyResponse>();
         if(!store.isPresent()){
             throw new APIException("No store found for given id");
         }
+
+        Optional<LoyaltyEntity> storeLoyaltyOptional = loyaltyRepository.findById(request.getStoreId());
+        if (storeLoyaltyOptional.isEmpty()) {
+            throw new APIException("No loyalty points configured for this store");
+        }
+
+        LoyaltyEntity storeLoyalty = storeLoyaltyOptional.get();
+
         String name = null;
 
         if ((request.getFirstName() == null || request.getFirstName().isEmpty())
@@ -111,6 +126,10 @@ public class LoyaltyPointsHandler {
             name = request.getFirstName().trim() + " " + request.getLastName().trim();
         }
 
+        if (name != null) {
+            name = name.trim();
+        }
+
         if(name.trim().isEmpty()){
             name = null;
         }
@@ -119,60 +138,76 @@ public class LoyaltyPointsHandler {
             request.setCustomerPhone(null);
         }
 
-        Optional<CustomerLoyaltyEntity> customerLoyaltyEntityOptional;
+        Optional<List<CustomerLoyaltyEntity>> customerLoyaltyEntityOptional;
         if(request.getCustomerPhone() != null &&  name != null) {
-            customerLoyaltyEntityOptional = customerLoyaltyRepository.findByCustomerNameAndCustomerPhoneAndFirstByOrderByDiscountedDateDsc(name, request.getCustomerPhone());
-        }else{
-            customerLoyaltyEntityOptional = customerLoyaltyRepository.findByCustomerNameOrCustomerPhoneAndFirstByOrderByDiscountedDateDsc(name, request.getCustomerPhone());
-        }
-
-        Date lastDiscountedDate;
-
-        if (customerLoyaltyEntityOptional.isPresent()) {
-            lastDiscountedDate = customerLoyaltyEntityOptional.get().getDiscountedDate();
+            customerLoyaltyEntityOptional = customerLoyaltyRepository.findByCustomerNameAndCustomerPhoneAndStoreIdAndFirstByOrderByDiscountedDateDsc(name, request.getCustomerPhone(), request.getStoreId());
+            Date lastDiscountedDate;
+            if (customerLoyaltyEntityOptional.isPresent() && customerLoyaltyEntityOptional.isEmpty()) {
+                lastDiscountedDate = customerLoyaltyEntityOptional.get().get(0).getDiscountedDate();
+            } else {
+                SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
+                String dateInString = "1-Jan-1800";
+                lastDiscountedDate = formatter.parse(dateInString);
+            }
+            List<Object[]> saleRecords = saleRepository.findTotalSalesForCustomerPhoneAndNameAfterDate(request.getCustomerPhone(), name, lastDiscountedDate);
+            responseList.addAll(getCustomerLoyaltyResponseList(saleRecords, storeLoyalty, request));
         } else {
+            customerLoyaltyEntityOptional = customerLoyaltyRepository.findByCustomerNameOrCustomerPhoneAndStoreIdAndFirstByOrderByDiscountedDateDsc(name, request.getCustomerPhone(), request.getStoreId());
+
+            List<CustomerLoyaltyEntity> customerLoyaltyEntities = new ArrayList<CustomerLoyaltyEntity>();
+
+            if (customerLoyaltyEntityOptional.isPresent() && !customerLoyaltyEntityOptional.isEmpty()) {
+                customerLoyaltyEntities = customerLoyaltyEntityOptional.get();
+            }
+
+            for (CustomerLoyaltyEntity entity: customerLoyaltyEntities) {
+                List<Object[]> saleRecords = saleRepository.findTotalSalesForCustomerPhoneAndNameAfterDate(request.getCustomerPhone(), name, entity.getDiscountedDate());
+                responseList.addAll(getCustomerLoyaltyResponseList(saleRecords, storeLoyalty, request));
+            }
+
+            final List<CustomerLoyaltyEntity> cList = customerLoyaltyEntities;
+                
             SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
             String dateInString = "1-Jan-1800";
-            lastDiscountedDate = formatter.parse(dateInString);
+            Date lastDiscountedDate = formatter.parse(dateInString);
+            
+            List<Object[]> saleRecords = saleRepository.findTotalSalesForCustomerPhoneOrNameAfterDate(request.getCustomerPhone(), name, lastDiscountedDate);
+
+            saleRecords.stream().filter(record -> cList.stream().noneMatch(customerEntity -> customerEntity.getCustomerPhone().equals((String)record[1]) && customerEntity.getCustomerName().equals((String)record[2])));
+            responseList.addAll(getCustomerLoyaltyResponseList(saleRecords, storeLoyalty, request));
         }
 
-        CustomerLoyaltyResponse response = new CustomerLoyaltyResponse();
-        response.setFirstName(request.getFirstName());
-        response.setLastName(request.getLastName());
-        response.setPhoneNumber(request.getCustomerPhone());
+        return responseList;
+    }
 
+    List<CustomerLoyaltyResponse> getCustomerLoyaltyResponseList(List<Object[]> saleRecords, LoyaltyEntity storeLoyalty, CustomerLoyaltyRequest request) {
+        List<CustomerLoyaltyResponse> responseList = new ArrayList<CustomerLoyaltyResponse>();
         Double totalSaleAfterDate;
-        if(request.getCustomerPhone() != null &&  name != null) {
-            totalSaleAfterDate = saleRepository.findTotalSalesForCustomerPhoneAndNameAfterDate(request.getCustomerPhone(), name, lastDiscountedDate);
-        }else{
-            totalSaleAfterDate = saleRepository.findTotalSalesForCustomerPhoneOrNameAfterDate(request.getCustomerPhone(), name, lastDiscountedDate);
+
+        for (Object[] obj: saleRecords) {
+            CustomerLoyaltyResponse response = new CustomerLoyaltyResponse();
+            response.setFirstName(request.getFirstName());
+            response.setLastName(request.getLastName());
+            response.setPhoneNumber((String)obj[1]);
+            totalSaleAfterDate = (Double)obj[0];
+            if (totalSaleAfterDate == null) {
+                totalSaleAfterDate = 0D;
+            }
+            
+            Long pointsEarned = Math.round((totalSaleAfterDate / storeLoyalty.getSalesVolume()) * storeLoyalty.getLoyaltyPoints());
+            Double totalDiscPercentage = 0D;
+            Double totalDiscountAmount = 0D;
+
+            if (pointsEarned > storeLoyalty.getMinLoyaltyPoints()) {
+                totalDiscPercentage = storeLoyalty.getFixedDiscountPercentage();
+                totalDiscountAmount = (totalDiscPercentage * totalSaleAfterDate)/100;
+            }
+
+            response.setLoyaltyPoints(pointsEarned.intValue());
+            response.setDiscountEligible(totalDiscountAmount);
+            response.setTotalSalesVolume(totalSaleAfterDate);
+            responseList.add(response);
         }
-
-        if (totalSaleAfterDate == null) {
-            totalSaleAfterDate = 0D;
-        }
-
-        Optional<LoyaltyEntity> storeLoyaltyOptional = loyaltyRepository.findById(request.getStoreId());
-        if (storeLoyaltyOptional.isEmpty()) {
-            throw new APIException("No loyalty points configured for this store");
-        }
-
-        LoyaltyEntity storeLoyalty = storeLoyaltyOptional.get();
-
-        Long pointsEarned = Math.round((totalSaleAfterDate / storeLoyalty.getSalesVolume()) * storeLoyalty.getLoyaltyPoints());
-        Double totalDiscPercentage = 0D;
-        Double totalDiscountAmount = 0D;
-
-        if (pointsEarned > storeLoyalty.getMinLoyaltyPoints()) {
-            totalDiscPercentage = storeLoyalty.getFixedDiscountPercentage();
-            totalDiscountAmount = (totalDiscPercentage * totalSaleAfterDate)/100;
-        }
-
-        response.setLoyaltyPoints(pointsEarned.intValue());
-        response.setDiscountEligible(totalDiscountAmount);
-        response.setTotalSalesVolume(totalSaleAfterDate);
-
-
-        return response;
+        return responseList;
     }
 }

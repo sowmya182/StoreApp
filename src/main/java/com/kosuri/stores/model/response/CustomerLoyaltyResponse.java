@@ -3,7 +3,7 @@ package com.kosuri.stores.model.response;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class CustomerLoyaltyResponse extends GenericResponse {
+public class CustomerLoyaltyResponse {
     private String firstName;
     private String lastName;
     private String phoneNumber;

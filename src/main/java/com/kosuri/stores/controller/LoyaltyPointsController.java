@@ -7,12 +7,15 @@ import com.kosuri.stores.model.request.CustomerLoyaltyRequest;
 import com.kosuri.stores.model.request.RedeemLoyaltyPointsRequest;
 import com.kosuri.stores.model.response.ConfigureLoyaltyPointsResponse;
 import com.kosuri.stores.model.response.CustomerLoyaltyResponse;
+import com.kosuri.stores.model.response.CustomerLoyaltyResponseList;
 import com.kosuri.stores.model.response.RedeemLoyaltyPointsResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/loyalty/points")
@@ -47,18 +50,18 @@ public class LoyaltyPointsController {
     }
 
     @PostMapping("/checkDiscount")
-    public ResponseEntity<CustomerLoyaltyResponse> checkDiscount(@Valid @RequestBody CustomerLoyaltyRequest request) {
-        CustomerLoyaltyResponse response = new CustomerLoyaltyResponse();
+    public ResponseEntity<CustomerLoyaltyResponseList> checkDiscount(@Valid @RequestBody CustomerLoyaltyRequest request) {
+        CustomerLoyaltyResponseList responseList = new CustomerLoyaltyResponseList();
         try {
-            response = loyaltyPointsHandler.getDiscountForCustomer(request);
-            return ResponseEntity.status(HttpStatus.OK).body(response);
+            responseList.setCustomerLoyaltyResponseList(loyaltyPointsHandler.getDiscountForCustomer(request));
+            return ResponseEntity.status(HttpStatus.OK).body(responseList);
         } catch (APIException e) {
-            response.setResponseMessage(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            responseList.setResponseMessage(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseList);
         }
         catch (Exception e) {
-            response.setResponseMessage(e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            responseList.setResponseMessage(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseList);
         }
 
     }
