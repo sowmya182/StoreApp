@@ -161,7 +161,7 @@ public class LoyaltyPointsHandler {
             }
 
             for (CustomerLoyaltyEntity entity: customerLoyaltyEntities) {
-                List<Object[]> saleRecords = saleRepository.findTotalSalesForCustomerPhoneOrNameAndStoreIdAfterDate(request.getCustomerPhone(), name, entity.getDiscountedDate(), request.getStoreId());
+                List<Object[]> saleRecords = saleRepository.findTotalSalesForCustomerPhoneAndNameAndStoreIdAfterDate(request.getCustomerPhone(), name, entity.getDiscountedDate(), request.getStoreId());
                 responseList.addAll(getCustomerLoyaltyResponseList(saleRecords, storeLoyalty, request));
             }
 
