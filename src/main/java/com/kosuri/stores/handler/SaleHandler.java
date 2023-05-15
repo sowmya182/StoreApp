@@ -56,7 +56,7 @@ public class SaleHandler {
             tempSale.setCustName(row.getCell(5).getStringCellValue());
 
             tempSale.setPatientName(row.getCell(6).getStringCellValue());
-            tempSale.setCreatedUser(String.valueOf(row.getCell(7).getNumericCellValue()));
+            tempSale.setCreatedUser(String.valueOf(new BigDecimal(row.getCell(7).getNumericCellValue()).toBigInteger()));
             try {
                 tempSale.setItemCode(row.getCell(8).getStringCellValue());
             } catch (Exception e) {
