@@ -20,6 +20,6 @@ public interface CustomerLoyaltyRepository extends JpaRepository<CustomerLoyalty
     "ORDER BY t1.customerPhone ASC, t1.customerName ASC")
     public Optional<List<CustomerLoyaltyEntity>> findByCustomerNameOrCustomerPhoneAndStoreIdAndFirstByOrderByDiscountedDateDsc(String customerName, String customerPhone, String storeId);
 
-    @Query("select e from CustomerLoyaltyEntity e where e.customerName = ?1 AND e.customerPhone = ?2 order by e.discountedDate limit 1")
+    @Query("select e from CustomerLoyaltyEntity e where e.customerName = ?1 AND e.customerPhone = ?2 and e.storeId = ?3 order by e.discountedDate limit 1")
     public Optional<List<CustomerLoyaltyEntity>> findByCustomerNameAndCustomerPhoneAndStoreIdAndFirstByOrderByDiscountedDateDsc(String customerName, String customerPhone, String storeId);
 }

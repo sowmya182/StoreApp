@@ -149,7 +149,7 @@ public class LoyaltyPointsHandler {
                 String dateInString = "1-Jan-1800";
                 lastDiscountedDate = formatter.parse(dateInString);
             }
-            List<Object[]> saleRecords = saleRepository.findTotalSalesForCustomerPhoneAndNameAfterDate(request.getCustomerPhone(), name, lastDiscountedDate);
+            List<Object[]> saleRecords = saleRepository.findTotalSalesForCustomerPhoneAndNameAndStoreIdAfterDate(request.getCustomerPhone(), name, lastDiscountedDate, request.getStoreId());
             responseList.addAll(getCustomerLoyaltyResponseList(saleRecords, storeLoyalty, request));
         } else {
             customerLoyaltyEntityOptional = customerLoyaltyRepository.findByCustomerNameOrCustomerPhoneAndStoreIdAndFirstByOrderByDiscountedDateDsc(name, request.getCustomerPhone(), request.getStoreId());
@@ -161,7 +161,7 @@ public class LoyaltyPointsHandler {
             }
 
             for (CustomerLoyaltyEntity entity: customerLoyaltyEntities) {
-                List<Object[]> saleRecords = saleRepository.findTotalSalesForCustomerPhoneAndNameAfterDate(request.getCustomerPhone(), name, entity.getDiscountedDate());
+                List<Object[]> saleRecords = saleRepository.findTotalSalesForCustomerPhoneOrNameAndStoreIdAfterDate(request.getCustomerPhone(), name, entity.getDiscountedDate(), request.getStoreId());
                 responseList.addAll(getCustomerLoyaltyResponseList(saleRecords, storeLoyalty, request));
             }
 
@@ -171,7 +171,7 @@ public class LoyaltyPointsHandler {
             String dateInString = "1-Jan-1800";
             Date lastDiscountedDate = formatter.parse(dateInString);
             
-            List<Object[]> saleRecords = saleRepository.findTotalSalesForCustomerPhoneOrNameAfterDate(request.getCustomerPhone(), name, lastDiscountedDate);
+            List<Object[]> saleRecords = saleRepository.findTotalSalesForCustomerPhoneOrNameAndStoreIdAfterDate(request.getCustomerPhone(), name, lastDiscountedDate, request.getStoreId());
 
             saleRecords.stream().filter(record -> cList.stream().noneMatch(customerEntity -> customerEntity.getCustomerPhone().equals((String)record[1]) && customerEntity.getCustomerName().equals((String)record[2])));
             responseList.addAll(getCustomerLoyaltyResponseList(saleRecords, storeLoyalty, request));
@@ -186,8 +186,13 @@ public class LoyaltyPointsHandler {
 
         for (Object[] obj: saleRecords) {
             CustomerLoyaltyResponse response = new CustomerLoyaltyResponse();
-            response.setFirstName(request.getFirstName());
-            response.setLastName(request.getLastName());
+            String name = (String)obj[2];
+            String[] n1 = name.split(" ");
+
+            if (n1.length > 0)
+            response.setFirstName(n1[0]);
+            if (n1.length > 1)
+            response.setLastName(n1[1]);
             response.setPhoneNumber((String)obj[1]);
             totalSaleAfterDate = (Double)obj[0];
             if (totalSaleAfterDate == null) {
