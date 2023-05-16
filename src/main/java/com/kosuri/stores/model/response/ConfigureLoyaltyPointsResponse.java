@@ -8,18 +8,22 @@ public class ConfigureLoyaltyPointsResponse extends GenericResponse{
 
 
     public Double getTotalSalesVolume() {
-        return this.totalSalesVolume;
+        return totalSalesVolume;
     }
 
     public Double getTotalDiscount() {
-        return this.totalDiscount;
+        return totalDiscount;
     }
 
     public void setTotalSalesVolume(Double totalSalesVolume) {
-        this.totalSalesVolume =  Double.parseDouble(df.format(totalSalesVolume));
+        if(totalSalesVolume!=null){
+         this.totalSalesVolume =  Double.parseDouble(df.format(totalSalesVolume));
+        }
     }
 
     public void setTotalDiscount(Double totalDiscount) {
-        this.totalDiscount = Double.parseDouble(df.format(totalDiscount));
+        if(totalDiscount!=null){
+         this.totalDiscount = Double.parseDouble(df.format(totalDiscount));
+        }
     }
 }

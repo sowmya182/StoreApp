@@ -61,6 +61,8 @@ public class CustomerLoyaltyResponse {
     }
 
     public void setDiscountEligible(Double discountEligible) {
-        this.discountEligible = Double.parseDouble(df.format(discountEligible));
+        if(discountEligible!=null){
+             this.discountEligible = Double.parseDouble(df.format(discountEligible));
+        }
     }
 }
