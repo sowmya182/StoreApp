@@ -1,6 +1,7 @@
 package com.kosuri.stores.model.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.text.DecimalFormat;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CustomerLoyaltyResponse {
@@ -11,6 +12,9 @@ public class CustomerLoyaltyResponse {
 
     private Integer loyaltyPoints;
     private Double discountEligible;
+
+    private static final DecimalFormat df = new DecimalFormat("0.00");
+
 
     public String getFirstName() {
         return firstName;
@@ -41,7 +45,7 @@ public class CustomerLoyaltyResponse {
     }
 
     public void setTotalSalesVolume(Double totalSalesVolume) {
-        this.totalSalesVolume = totalSalesVolume;
+        this.totalSalesVolume = Double.parseDouble(df.format(totalSalesVolume));
     }
 
     public Integer getLoyaltyPoints() {
@@ -57,6 +61,6 @@ public class CustomerLoyaltyResponse {
     }
 
     public void setDiscountEligible(Double discountEligible) {
-        this.discountEligible = discountEligible;
+        this.discountEligible = Double.parseDouble(df.format(discountEligible));
     }
 }
