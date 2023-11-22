@@ -1,7 +1,9 @@
 package com.kosuri.stores.handler;
 
 import com.kosuri.stores.dao.StoreEntity;
+import com.kosuri.stores.dao.TabStoreUserEntity;
 import com.kosuri.stores.exception.APIException;
+import com.kosuri.stores.model.request.AddTabStoreUserRequest;
 import com.kosuri.stores.model.request.AddUserRequest;
 import com.kosuri.stores.model.request.LoginUserRequest;
 import com.kosuri.stores.model.response.LoginUserResponse;
@@ -36,7 +38,43 @@ public class UserHandler {
         }
         return true;
     }
+    public boolean addUser(AddTabStoreUserRequest request) throws Exception {
+        if(!repositoryHandler.validateStoreUser(request)){
+            return false;
+        }
+        TabStoreUserEntity userStoreEntity = getEntityFromStoreUserRequest(request);
+        try {
+            repositoryHandler.addStoreUser(userStoreEntity, request);
+        } catch (DataIntegrityViolationException e) {
+            throw new Exception(e.getCause().getCause().getMessage());
+        }
+        return true;
+    }
 
+    private TabStoreUserEntity getEntityFromStoreUserRequest(AddTabStoreUserRequest request) {
+        TabStoreUserEntity storeEntity = new TabStoreUserEntity();
+        
+        storeEntity.setStatus(request.getStatus());
+        storeEntity.setName(request.getUserFullName());
+        storeEntity.setStoreUserEmail(request.getUserEmail());
+        storeEntity.setStoreUserContact(request.getUserPhoneNumber());
+        storeEntity.setType(request.getStore());
+        storeEntity.setStoreAdminContact(request.getStoreAdminMobile());
+        storeEntity.setStoreAdminEmail(request.getStoreAdminEmail());
+        storeEntity.setPassword(request.getPassword());
+        storeEntity.setRegistrationDate(LocalDateTime.now().toString());
+
+        //setting dummy parameters.
+		/*
+		 * if(request.getUserPhoneNumber() != null){ storeEntity.setId("DUMMY" +
+		 * request.getUserPhoneNumber());
+		 * 
+		 * }else{ storeEntity.setId("DUMMY" + request.getUserEmail()); }
+		 */
+        storeEntity.setAddedBy("admin");
+
+        return storeEntity;
+    }
     public LoginUserResponse loginUser(LoginUserRequest request) throws Exception {
         LoginUserResponse response = new LoginUserResponse();
 

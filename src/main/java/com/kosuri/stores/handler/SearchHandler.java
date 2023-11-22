@@ -32,7 +32,7 @@ public class SearchHandler {
                 if (storeEntity.getId().contains("DUMMY")) {
                     continue;
                 }
-                List<StockEntity> availableStockEntity = stockRepository.findByItemNameContainingAndStoreIdAndBalQuantityGreaterThan(medicine,
+                List<StockEntity> availableStockEntity = stockRepository.findFirstByItemNameContainingAndStoreIdAndBalQuantityGreaterThan(medicine,
                         storeEntity.getId(), 0D);
 
                 for (StockEntity stockEntity : availableStockEntity) {

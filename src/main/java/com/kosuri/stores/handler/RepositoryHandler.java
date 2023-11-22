@@ -3,6 +3,7 @@ package com.kosuri.stores.handler;
 import com.kosuri.stores.dao.*;
 import com.kosuri.stores.exception.APIException;
 import com.kosuri.stores.model.enums.Role;
+import com.kosuri.stores.model.request.AddTabStoreUserRequest;
 import com.kosuri.stores.model.request.AddUserRequest;
 import com.kosuri.stores.model.request.LoginUserRequest;
 import jakarta.validation.Valid;
@@ -27,6 +28,9 @@ public class RepositoryHandler {
 
     @Autowired
     private StockRepository stockRepository;
+    
+    @Autowired
+    private TabStoreRepository tabStoreRepository;
 
     public StoreEntity addStoreToRepository(@Valid StoreEntity storeEntity) throws Exception {
         Optional<StoreEntity> store = storeRepository.findById(storeEntity.getId());
@@ -93,6 +97,16 @@ public class RepositoryHandler {
 
         return true;
     }
+    public void addStoreUser(@Valid TabStoreUserEntity storeEntity, AddTabStoreUserRequest request) throws Exception {
+        //TODO Update to query based on id
+        Optional<RoleEntity> role = roleRepository.findByRoleName(request.getRole());
+        if(!role.isPresent()){
+            throw new APIException("Role does not exist. Please enter a valid role");
+        }
+
+        tabStoreRepository.save(storeEntity);
+
+    }
 
     public StoreEntity loginUser(LoginUserRequest request) throws Exception {
         Optional<List<StoreEntity>> existingStores = storeRepository.findByOwnerEmailOrOwnerContact(request.getEmail(), request.getPhoneNumber());
@@ -110,5 +124,19 @@ public class RepositoryHandler {
 
         throw new APIException("Invalid Credentials!");
     }
+public boolean validateStoreUser(AddTabStoreUserRequest request) throws Exception{
+    Optional<List<TabStoreUserEntity>> existingStores = tabStoreRepository.findByStoreUserEmailOrStoreUserContact(request.getUserEmail(), request.getUserPhoneNumber());
+    if(existingStores.isEmpty()){
+        return true;
+    }
+    for (TabStoreUserEntity store: existingStores.get()){
+        //TODO Update to query based on id
+        if (store.getStoreUserEmail().contains(request.getUserEmail())){
+            System.out.println("User already exists in system");
+            throw new APIException("User already exists in system");
+        }
+    }
 
+    return true;
+}
 }
