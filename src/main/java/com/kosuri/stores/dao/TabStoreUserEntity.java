@@ -23,6 +23,7 @@ public class TabStoreUserEntity {
     private @Column(name = "store_admin_mobile") String storeAdminContact;
     private @Column(name = "status") String status;
     private @Column(name = "password") String password;
+    private @Column(name = "user_type") String userType;
     
 	public String getType() {
 		return type;
@@ -85,5 +86,10 @@ public class TabStoreUserEntity {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-    
+	public String getUserType() {
+		return userType;
+	}
+	public void setUserType(String userType) {
+		this.userType = userType;
+	}
 }

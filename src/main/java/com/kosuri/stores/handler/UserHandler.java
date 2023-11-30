@@ -7,6 +7,9 @@ import com.kosuri.stores.model.request.AddTabStoreUserRequest;
 import com.kosuri.stores.model.request.AddUserRequest;
 import com.kosuri.stores.model.request.LoginUserRequest;
 import com.kosuri.stores.model.response.LoginUserResponse;
+
+import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -45,6 +48,7 @@ public class UserHandler {
         TabStoreUserEntity userStoreEntity = getEntityFromStoreUserRequest(request);
         try {
             repositoryHandler.addStoreUser(userStoreEntity, request);
+            
         } catch (DataIntegrityViolationException e) {
             throw new Exception(e.getCause().getCause().getMessage());
         }
@@ -124,4 +128,16 @@ public class UserHandler {
 
         return storeEntity;
     }
+	public boolean verifyEmailOTP(@Valid String emailOtp) {
+		
+		return repositoryHandler.verifyEmailOtp(emailOtp)? true:false;
+	}
+	public boolean verifySmsOTP(@Valid String smsOtp) {
+		 return repositoryHandler.verifyPhoneOtp(smsOtp)? true:false;
+	}
+	public String sendEmailOtp(@Valid AddTabStoreUserRequest request) {
+		 String otp = repositoryHandler.sendEmailOtp(request);
+		return otp;
+		
+	}
 }
