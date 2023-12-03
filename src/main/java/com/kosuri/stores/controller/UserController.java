@@ -1,5 +1,8 @@
 package com.kosuri.stores.controller;
 
+import com.kosuri.stores.constant.StoreConstants;
+import com.kosuri.stores.handler.RepositoryHandler;
+import com.kosuri.stores.request.OTPRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.kosuri.stores.SendSMS;
+
 import com.kosuri.stores.exception.APIException;
 import com.kosuri.stores.handler.UserHandler;
 import com.kosuri.stores.model.request.AddTabStoreUserRequest;
@@ -27,8 +30,6 @@ public class UserController {
 	@Autowired
 	UserHandler userHandler;
 
-	@Autowired
-	private SendSMS sendSMS;
 
 	@PostMapping("/add")
 	public ResponseEntity<GenericResponse> addUser(@Valid @RequestBody AddUserRequest request) {
@@ -73,9 +74,13 @@ public class UserController {
 		HttpStatus httpStatus;
 		GenericResponse response = new GenericResponse();
 		try {
-			userHandler.addUser(request);
+			boolean isUserAdded = userHandler.addUser(request);
 			httpStatus = HttpStatus.OK;
-			response.setResponseMessage("User added successfully");
+			if (isUserAdded){
+
+				response.setResponseMessage("User added successfully and Otp Send to the User Email and Mobile");
+			}
+
 		} catch (APIException e) {
 			httpStatus = HttpStatus.BAD_REQUEST;
 			response.setResponseMessage(e.getMessage());
@@ -92,9 +97,9 @@ public class UserController {
 		HttpStatus httpStatus;
 		OTPResponse response = new OTPResponse();
 		try {
-			String emailotp = userHandler.sendEmailOtp(request);
+			boolean isOtpSend = userHandler.sendEmailOtp(request);
 			httpStatus = HttpStatus.OK;
-			response.setOtp(emailotp);
+			response.setOtp("OTP Send Successfully");
 		} catch (Exception e) {
 			httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
 			response.setOtp(e.getMessage());
@@ -102,7 +107,7 @@ public class UserController {
 		return ResponseEntity.status(httpStatus).body(response);
 	}
 
-	@PostMapping("/sendSMSOtp")
+	/*@PostMapping("/sendSMSOtp")
 	public String sendSMSOTP(@Valid String phoneNumber) {
 		String otp = null;
 		try {
@@ -111,28 +116,32 @@ public class UserController {
 			System.out.println(e.getMessage());
 		}
 		return otp;
-	}
+	}*/
 
 	@PostMapping("/verifyEmailOTP")
-	public ResponseEntity<GenericResponse> verifyEmailOTP(@Valid @RequestParam("EmailOTP") String emailOtp) {
+	public ResponseEntity<GenericResponse> verifyEmailOTP(@Valid @RequestBody OTPRequest emailOtp) {
 		HttpStatus httpStatus;
 		GenericResponse response = new GenericResponse();
 		try {
-			boolean isEmailVerified = userHandler.verifyEmailOTP(emailOtp);
+			boolean isEmailVerified = userHandler.verifyEmailOTP(emailOtp.getEmail(), emailOtp.getOtp());
 			httpStatus = HttpStatus.OK;
 			if (isEmailVerified) {
 				response.setResponseMessage("Email Verification Success");
+			} else if(StoreConstants.IS_EMAIL_ALREADY_VERIFIED){
+				response.setResponseMessage("Email Already Verified");
+			}else{
+				response.setResponseMessage("Invalid Otp");
 			}
 		} catch (Exception e) {
 			httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-			response.setResponseMessage(e.getMessage());
+			response.setResponseMessage("Verification failed.");
 		}
 
 		return ResponseEntity.status(httpStatus).body(response);
 	}
 
 	@PostMapping("/verifySmsOTP")
-	public ResponseEntity<GenericResponse> verifySMSOTP(@Valid @RequestParam("SMSOTP") String smsOtp) {
+	public ResponseEntity<GenericResponse> verifySMSOTP(@Valid @RequestBody OTPRequest smsOtp) {
 		HttpStatus httpStatus;
 		GenericResponse response = new GenericResponse();
 		try {

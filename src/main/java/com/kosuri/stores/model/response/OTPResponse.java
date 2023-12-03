@@ -1,14 +1,11 @@
 package com.kosuri.stores.model.response;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class OTPResponse {
-
-    public String getOtp() {
-		return otp;
-	}
-
-	public void setOtp(String otp) {
-		this.otp = otp;
-	}
 
 	private String otp;
 }

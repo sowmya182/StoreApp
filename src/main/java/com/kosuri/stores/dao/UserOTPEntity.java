@@ -7,6 +7,9 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
+
+import javax.persistence.GeneratedValue;
 
 @Getter
 @Setter
@@ -15,7 +18,7 @@ import lombok.Setter;
 public class UserOTPEntity {
 	@Id
 	@NotNull
-	private @Column(name = "user_otp_id") String userOtpId;
+	private @Column(name = "user_id") String userOtpId;
 	private @Column(name = "active") Integer active;
 	private @Column(name = "created_on") String createdOn;
 	private @Column(name = "updated_on") String updatedOn;
@@ -27,12 +30,7 @@ public class UserOTPEntity {
 	private @Column(name = "phone_otp") String phoneOtp;
 	private @Column(name = "email_verify") boolean emailVerify;
 	private @Column(name = "sms_verify") boolean smsVerify;
-	public String getUserOtpId() {
-		return userOtpId;
-	}
-	public void setUserOtpId(String userOtpId) {
-		this.userOtpId = userOtpId;
-	}
+
 	public Integer getActive() {
 		return active;
 	}

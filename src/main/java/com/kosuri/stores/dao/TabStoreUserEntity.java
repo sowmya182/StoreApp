@@ -10,14 +10,16 @@ import jakarta.validation.constraints.NotNull;
 @Table(name = "tab_store_user_login")
 public class TabStoreUserEntity {
     private @Column(name = "store_category") String type;
-    
+
+	@Id
+	@NotNull
+	private @Column(name = "user_id") String userId;
     private @Column(name = "store_user_full_name") String name;
     @NotNull
     private @Column(name = "store_user_phonenumber", unique=true) String storeUserContact;
-    @Id
     @NotNull
     private @Column(name = "store_user_emailid") String storeUserEmail;
-    private @Column(name = "registration_date") String registrationDate;
+    private @Column(name = "registraion_date") String registrationDate;
     private @Column(name = "addedby") String addedBy;
     private @Column(name = "store_admin_email") String storeAdminEmail;
     private @Column(name = "store_admin_mobile") String storeAdminContact;
@@ -25,6 +27,13 @@ public class TabStoreUserEntity {
     private @Column(name = "password") String password;
     private @Column(name = "user_type") String userType;
     
+	public String getUserId() {
+		return userId;
+	}
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
 	public String getType() {
 		return type;
 	}

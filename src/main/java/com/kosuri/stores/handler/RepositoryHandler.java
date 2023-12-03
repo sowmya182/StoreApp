@@ -5,11 +5,11 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
+import com.kosuri.stores.constant.StoreConstants;
+import com.kosuri.stores.model.enums.UserType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.kosuri.stores.EmailVerification;
-import com.kosuri.stores.SendSMS;
 import com.kosuri.stores.dao.PurchaseEntity;
 import com.kosuri.stores.dao.PurchaseRepository;
 import com.kosuri.stores.dao.RoleEntity;
@@ -33,6 +33,7 @@ import jakarta.validation.Valid;
 
 @Service
 public class RepositoryHandler {
+
 	@Autowired
 	private StoreRepository storeRepository;
 	@Autowired
@@ -52,8 +53,10 @@ public class RepositoryHandler {
 
 	@Autowired
 	private UserOTPRepository userOTPRepository;
+
 	@Autowired
-	private SendSMS sendSMS;
+	private OtpHandler otpHandler;
+
 
 	public StoreEntity addStoreToRepository(@Valid StoreEntity storeEntity) throws Exception {
 		Optional<StoreEntity> store = storeRepository.findById(storeEntity.getId());
@@ -121,16 +124,29 @@ public class RepositoryHandler {
 		return true;
 	}
 
-	public void addStoreUser(@Valid TabStoreUserEntity storeEntity, AddTabStoreUserRequest request) throws Exception {
+	public boolean addStoreUser(@Valid TabStoreUserEntity storeEntity, AddTabStoreUserRequest request) throws Exception {
 		// TODO Update to query based on id
 		Optional<RoleEntity> role = roleRepository.findByRoleName(request.getRole());
+
 		if (!role.isPresent()) {
 			throw new APIException("Role does not exist. Please enter a valid role");
 		}
-
-		tabStoreRepository.save(storeEntity);
-		
-	}
+		TabStoreUserEntity user = tabStoreRepository.save(storeEntity);
+		if ( user.getStoreUserEmail() != null) {
+			//sets the EmailId and created Date for UserOTPEnitity
+			UserOTPEntity userOtp = new UserOTPEntity();
+			userOtp.setUserOtpId(storeEntity.getUserId());
+			userOtp.setUserEmail(request.getUserEmail());
+			userOtp.setActive(0);
+			userOtp.setCreatedOn(LocalDateTime.now().toString());
+			userOtp.setUserPhoneNumber(storeEntity.getStoreUserContact());
+			userOTPRepository.save(userOtp);
+			boolean isMessageSent = sendEmailOtp(storeEntity);
+			boolean isPhoneOtpSent = sendOtpToSMS(storeEntity);
+			return true;
+		}
+		return false;
+    }
 
 
 	public StoreEntity loginUser(LoginUserRequest request) throws Exception {
@@ -169,22 +185,27 @@ public class RepositoryHandler {
 		return true;
 	}
 
-	public boolean verifyEmailOtp(@Valid String emailOtp) {
-		Optional<UserOTPEntity> userOtpEntityOptional = userOTPRepository.findByEmailOtp(emailOtp);
+	public boolean verifyEmailOtp(@Valid String email, @Valid String emailOtp) {
+		Optional<UserOTPEntity> userOtpEntityOptional = userOTPRepository.findByUserEmailAndEmailOtp(email,emailOtp);
 		UserOTPEntity userOtpEntity = userOtpEntityOptional.orElse(null);
+
 		if (userOtpEntity != null) {
-			userOtpEntity.setEmailVerify(true);
-			userOtpEntity.setActive(1);
-			userOtpEntity.setUpdatedOn(LocalTime.now().toString());
-			userOTPRepository.save(userOtpEntity);
-			return true;
+			StoreConstants.IS_EMAIL_ALREADY_VERIFIED = userOtpEntity.isEmailVerify();
+			if (!userOtpEntity.isEmailVerify()){
+				userOtpEntity.setEmailVerify(true);
+				userOtpEntity.setActive(1);
+				userOtpEntity.setUpdatedOn(LocalTime.now().toString());
+				userOTPRepository.save(userOtpEntity);
+				return true;
+			}
 		} else {
 			return false;
 		}
+		return false;
 	}
 
-	public boolean verifyPhoneOtp(@Valid String phoneOtp) {
-		Optional<UserOTPEntity> userOtpEntityOptional = userOTPRepository.findByPhoneOtp(phoneOtp);
+	public boolean verifyPhoneOtp(@Valid String phoneOtp, @Valid String phoneNumber) {
+		Optional<UserOTPEntity> userOtpEntityOptional = userOTPRepository.findByUserPhoneNumberAndPhoneOtp(phoneNumber,phoneOtp);
 		UserOTPEntity userOtpEntity = userOtpEntityOptional.orElse(null);
 		if (userOtpEntity != null) {
 			userOtpEntity.setSmsVerify(true);
@@ -197,48 +218,25 @@ public class RepositoryHandler {
 		}
 	}
 
-	public String sendEmailOtp(@Valid AddTabStoreUserRequest request) {
-		Optional<TabStoreUserEntity> tabStoreUserOptional = tabStoreRepository.findById(request.getUserEmail());
+	public boolean sendEmailOtp(@Valid TabStoreUserEntity request) {
+		Optional<TabStoreUserEntity> tabStoreUserOptional = tabStoreRepository.findById(request.getUserId());
 		TabStoreUserEntity tabStoreUserEntity = tabStoreUserOptional.orElse(null);
-		String emailOtp = null;
-		if (null != tabStoreUserEntity && tabStoreUserEntity.getUserType().equalsIgnoreCase("SA")) {
-			String storeUserEmail = request.getUserEmail();
-			emailOtp = EmailVerification.sendEmailVerification(storeUserEmail);
-			saveEmailOtpDetails(emailOtp, storeUserEmail);
+		if (null != tabStoreUserEntity && tabStoreUserEntity.getUserType().equalsIgnoreCase(UserType.SA.toString())) {
+			String storeUserEmail = request.getStoreUserEmail();
+			return otpHandler.sendOtpToEmail(storeUserEmail);
 		}
-		return emailOtp;
+		return false;
 	}
 
-	public String sendSMSOtp(@Valid AddTabStoreUserRequest request) {
-		Optional<TabStoreUserEntity> tabStoreUserOptional = tabStoreRepository.findById(request.getUserEmail());
+	public boolean sendOtpToSMS(@Valid TabStoreUserEntity request) {
+		Optional<TabStoreUserEntity> tabStoreUserOptional = tabStoreRepository.findById(request.getUserId());
 		TabStoreUserEntity tabStoreUserEntity = tabStoreUserOptional.orElse(null);
-		String smsOtp = null;
-		if (null != tabStoreUserEntity && tabStoreUserEntity.getUserType().equalsIgnoreCase("SA")) {
-			Optional<UserOTPEntity> userOtpEntityOptional = userOTPRepository
-					.findById("DUMMY" + request.getUserEmail());
-			UserOTPEntity userOtpEntity = userOtpEntityOptional.orElse(null);
-			String storeUserPhoneNumber = request.getUserPhoneNumber();
-			smsOtp = sendSMS.sendSms(storeUserPhoneNumber);
-			saveSmsOtpDetails(smsOtp, storeUserPhoneNumber, userOtpEntity);
+		if (null != tabStoreUserEntity && tabStoreUserEntity.getUserType().equalsIgnoreCase(UserType.SA.toString())) {
+			String storeUserPhoneNumber = request.getStoreUserContact();
+			return otpHandler.sendOtpToPhoneNumber(storeUserPhoneNumber);
 		}
-		return smsOtp;
+		return false;
 	}
 
-	private void saveSmsOtpDetails(String smsOtp, String storeUserPhoneNumber, UserOTPEntity userOtpEntity) {
-		userOtpEntity.setPhoneOtp(smsOtp);
-		userOtpEntity.setUserPhoneNumber(storeUserPhoneNumber);
-		userOtpEntity.setPhoneOtpDate(LocalDateTime.now().toString());
-		userOTPRepository.save(userOtpEntity);
-	}
 
-	private void saveEmailOtpDetails(String emailOtp, String storeUserEmail) {
-		UserOTPEntity userOtpEntity = new UserOTPEntity();
-		userOtpEntity.setUserOtpId("DUMMY" + storeUserEmail);
-		userOtpEntity.setEmailOtp(emailOtp);
-		userOtpEntity.setEmailOtpDate(LocalDateTime.now().toString());
-		userOtpEntity.setUserEmail(storeUserEmail);
-
-		userOTPRepository.save(userOtpEntity);
-
-	}
 }

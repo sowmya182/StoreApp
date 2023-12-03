@@ -11,8 +11,11 @@ import java.util.Optional;
 @Repository
 public interface UserOTPRepository extends JpaRepository<UserOTPEntity, String> {
 
-	Optional<UserOTPEntity> findByEmailOtp(@Valid String emailOtp);
+	Optional<UserOTPEntity> findByUserEmailAndEmailOtp(String email, String emailOtp);
 
-	Optional<UserOTPEntity> findByPhoneOtp(@Valid String phoneOtp);
+	Optional<UserOTPEntity> findByUserPhoneNumberAndPhoneOtp(String phoneNumber,String phoneOtp);
 
+    Optional<UserOTPEntity> findByUserEmail(String email);
+
+	Optional<UserOTPEntity> findByUserPhoneNumber(String phoneNumber);
 }

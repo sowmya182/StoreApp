@@ -1,5 +1,6 @@
 package com.kosuri.stores.handler;
 
+import com.kosuri.stores.constant.StoreConstants;
 import com.kosuri.stores.dao.StoreEntity;
 import com.kosuri.stores.dao.TabStoreUserEntity;
 import com.kosuri.stores.exception.APIException;
@@ -8,6 +9,7 @@ import com.kosuri.stores.model.request.AddUserRequest;
 import com.kosuri.stores.model.request.LoginUserRequest;
 import com.kosuri.stores.model.response.LoginUserResponse;
 
+import com.kosuri.stores.request.OTPRequest;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,17 +45,18 @@ public class UserHandler {
         return true;
     }
     public boolean addUser(AddTabStoreUserRequest request) throws Exception {
-        if(!repositoryHandler.validateStoreUser(request)){
+        if (!repositoryHandler.validateStoreUser(request)) {
             return false;
         }
         TabStoreUserEntity userStoreEntity = getEntityFromStoreUserRequest(request);
+        boolean isUserAdded;
         try {
-            repositoryHandler.addStoreUser(userStoreEntity, request);
-            
+            isUserAdded = repositoryHandler.addStoreUser(userStoreEntity, request);
+
         } catch (DataIntegrityViolationException e) {
             throw new Exception(e.getCause().getCause().getMessage());
         }
-        return true;
+        return isUserAdded;
     }
 
     private TabStoreUserEntity getEntityFromStoreUserRequest(AddTabStoreUserRequest request) {
@@ -66,19 +70,29 @@ public class UserHandler {
         storeEntity.setStoreAdminContact(request.getStoreAdminMobile());
         storeEntity.setStoreAdminEmail(request.getStoreAdminEmail());
         storeEntity.setPassword(request.getPassword());
+        storeEntity.setUserType(request.getUserType());
         storeEntity.setRegistrationDate(LocalDateTime.now().toString());
+        storeEntity.setUserId(genereateUserId());
 
         //setting dummy parameters.
 		/*
 		 * if(request.getUserPhoneNumber() != null){ storeEntity.setId("DUMMY" +
 		 * request.getUserPhoneNumber());
-		 * 
+		 *
 		 * }else{ storeEntity.setId("DUMMY" + request.getUserEmail()); }
 		 */
         storeEntity.setAddedBy("admin");
 
         return storeEntity;
     }
+
+    private String genereateUserId() {
+        LocalDateTime timestamp = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        String timestampStr = timestamp.format(formatter);
+        return StoreConstants.RX_CONSTANT+"_"+timestampStr+"_"+OtpHandler.generateOTP(false);
+    }
+
     public LoginUserResponse loginUser(LoginUserRequest request) throws Exception {
         LoginUserResponse response = new LoginUserResponse();
 
@@ -128,16 +142,14 @@ public class UserHandler {
 
         return storeEntity;
     }
-	public boolean verifyEmailOTP(@Valid String emailOtp) {
-		
-		return repositoryHandler.verifyEmailOtp(emailOtp)? true:false;
+	public boolean verifyEmailOTP(String email, @Valid String emailOtp) {
+		return repositoryHandler.verifyEmailOtp(email,emailOtp);
 	}
-	public boolean verifySmsOTP(@Valid String smsOtp) {
-		 return repositoryHandler.verifyPhoneOtp(smsOtp)? true:false;
+	public boolean verifySmsOTP(@Valid OTPRequest smsOtp) {
+		 return repositoryHandler.verifyPhoneOtp(smsOtp.getOtp(), smsOtp.getPhoneNumber());
 	}
-	public String sendEmailOtp(@Valid AddTabStoreUserRequest request) {
-		 String otp = repositoryHandler.sendEmailOtp(request);
-		return otp;
-		
+	public boolean sendEmailOtp(@Valid AddTabStoreUserRequest request) {
+        TabStoreUserEntity entity = new TabStoreUserEntity();
+		return repositoryHandler.sendEmailOtp(entity);
 	}
 }
