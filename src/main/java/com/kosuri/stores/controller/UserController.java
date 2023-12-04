@@ -1,7 +1,6 @@
 package com.kosuri.stores.controller;
 
 import com.kosuri.stores.constant.StoreConstants;
-import com.kosuri.stores.handler.RepositoryHandler;
 import com.kosuri.stores.request.OTPRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -9,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -99,24 +97,15 @@ public class UserController {
 		try {
 			boolean isOtpSend = userHandler.sendEmailOtp(request);
 			httpStatus = HttpStatus.OK;
-			response.setOtp("OTP Send Successfully");
+			if (isOtpSend) {
+				response.setOtp("OTP Send Successfully");
+			}
 		} catch (Exception e) {
 			httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
 			response.setOtp(e.getMessage());
 		}
 		return ResponseEntity.status(httpStatus).body(response);
 	}
-
-	/*@PostMapping("/sendSMSOtp")
-	public String sendSMSOTP(@Valid String phoneNumber) {
-		String otp = null;
-		try {
-			otp = sendSMS.sendSms(phoneNumber);
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-		return otp;
-	}*/
 
 	@PostMapping("/verifyEmailOTP")
 	public ResponseEntity<GenericResponse> verifyEmailOTP(@Valid @RequestBody OTPRequest emailOtp) {
