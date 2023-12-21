@@ -3,27 +3,17 @@ package com.kosuri.stores.handler;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import com.kosuri.stores.constant.StoreConstants;
+import com.kosuri.stores.dao.*;
 import com.kosuri.stores.model.enums.UserType;
+import com.kosuri.stores.model.request.DiagnosticCenterRequest;
+import io.micrometer.common.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.kosuri.stores.dao.PurchaseEntity;
-import com.kosuri.stores.dao.PurchaseRepository;
-import com.kosuri.stores.dao.RoleEntity;
-import com.kosuri.stores.dao.RoleRepository;
-import com.kosuri.stores.dao.SaleEntity;
-import com.kosuri.stores.dao.SaleRepository;
-import com.kosuri.stores.dao.StockEntity;
-import com.kosuri.stores.dao.StockRepository;
-import com.kosuri.stores.dao.StoreEntity;
-import com.kosuri.stores.dao.StoreRepository;
-import com.kosuri.stores.dao.TabStoreRepository;
-import com.kosuri.stores.dao.TabStoreUserEntity;
-import com.kosuri.stores.dao.UserOTPEntity;
-import com.kosuri.stores.dao.UserOTPRepository;
 import com.kosuri.stores.exception.APIException;
 import com.kosuri.stores.model.request.AddTabStoreUserRequest;
 import com.kosuri.stores.model.request.AddUserRequest;
@@ -53,6 +43,13 @@ public class RepositoryHandler {
 
 	@Autowired
 	private UserOTPRepository userOTPRepository;
+
+	@Autowired
+	private DiagnosticServiceRepository diagnosticServiceRepository;
+
+	@Autowired
+	private DiagnosticMasterRepository diagnosticMasterRepository;
+
 
 	@Autowired
 	private OtpHandler otpHandler;
@@ -239,4 +236,23 @@ public class RepositoryHandler {
 	}
 
 
+	public void addDiagnosticCenter(DiagnosticServicesEntity diagnosticServicesEntity, DiagnosticCenterRequest request) {
+		diagnosticServiceRepository.save(diagnosticServicesEntity);
+	}
+
+	public boolean isDCActive(DiagnosticCenterRequest request) {
+		Optional<StoreEntity> storeInfoOptional = storeRepository.findById(request.getStoreId());
+		StoreEntity storeEntity = storeInfoOptional.orElse(null);
+		return (Objects.requireNonNull(storeEntity).getStatus().equalsIgnoreCase("true"));
+
+	}
+
+	public DiagnosticServicesEntity findServiceById(String userServiceId) {
+		Optional<DiagnosticServicesEntity> diagnosticServicesEntityOptional = diagnosticServiceRepository.findById(userServiceId);
+        return diagnosticServicesEntityOptional.orElse(null);
+	}
+
+	public void saveDiagnosticServiceEntity(DiagnosticServicesEntity serviceEntity) {
+		diagnosticServiceRepository.save(serviceEntity);
+	}
 }
