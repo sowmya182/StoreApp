@@ -25,6 +25,7 @@ public class StoreEntity {
     private @Column(name = "Location") String location;
     private @Column(name = "Contact_Person_Name") String owner;
     private @Column(name = "Phone_Number") String ownerContact;
+    private @Column(name = "password") String password;
     private @Column(name = "Secondary_Phone") String secondaryContact;
     private @Column(name = "EmailId") String ownerEmail;
     private @Column(name = "Reg_Date") String registrationDate;
@@ -36,6 +37,6 @@ public class StoreEntity {
     private @Column(name = "Modified_Time_Stamp") String modifiedTimeStamp;
     private @Column(name = "Status") String status;
     private @Column(name = "store_verified_status") String storeVerifiedStatus;
-    private @Column(name = "expiry date") String expiryDate;
+    private @Column(name = "`expiry date`") String expiryDate;
     private @Column(name = "current_plan") String currentPlan;
 }

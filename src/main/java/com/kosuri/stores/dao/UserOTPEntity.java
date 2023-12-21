@@ -7,9 +7,6 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.GenericGenerator;
-
-import javax.persistence.GeneratedValue;
 
 @Getter
 @Setter
@@ -30,73 +27,5 @@ public class UserOTPEntity {
 	private @Column(name = "phone_otp") String phoneOtp;
 	private @Column(name = "email_verify") boolean emailVerify;
 	private @Column(name = "sms_verify") boolean smsVerify;
-
-	public Integer getActive() {
-		return active;
-	}
-	public void setActive(Integer active) {
-		this.active = active;
-	}
-	public String getCreatedOn() {
-		return createdOn;
-	}
-	public void setCreatedOn(String createdOn) {
-		this.createdOn = createdOn;
-	}
-	public String getUpdatedOn() {
-		return updatedOn;
-	}
-	public void setUpdatedOn(String updatedOn) {
-		this.updatedOn = updatedOn;
-	}
-	public String getUserEmail() {
-		return userEmail;
-	}
-	public void setUserEmail(String userEmail) {
-		this.userEmail = userEmail;
-	}
-	public String getEmailOtpDate() {
-		return emailOtpDate;
-	}
-	public void setEmailOtpDate(String emailOtpDate) {
-		this.emailOtpDate = emailOtpDate;
-	}
-	public String getUserPhoneNumber() {
-		return userPhoneNumber;
-	}
-	public void setUserPhoneNumber(String userPhoneNumber) {
-		this.userPhoneNumber = userPhoneNumber;
-	}
-	public String getPhoneOtpDate() {
-		return phoneOtpDate;
-	}
-	public void setPhoneOtpDate(String phoneOtpDate) {
-		this.phoneOtpDate = phoneOtpDate;
-	}
-	public String getEmailOtp() {
-		return emailOtp;
-	}
-	public void setEmailOtp(String emailOtp) {
-		this.emailOtp = emailOtp;
-	}
-	public String getPhoneOtp() {
-		return phoneOtp;
-	}
-	public void setPhoneOtp(String phoneOtp) {
-		this.phoneOtp = phoneOtp;
-	}
-	public boolean isEmailVerify() {
-		return emailVerify;
-	}
-	public void setEmailVerify(boolean emailVerify) {
-		this.emailVerify = emailVerify;
-	}
-	public boolean isSmsVerify() {
-		return smsVerify;
-	}
-	public void setSmsVerify(boolean smsVerify) {
-		this.smsVerify = smsVerify;
-	}
-	
 	
 }
