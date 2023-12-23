@@ -7,15 +7,15 @@ import java.util.Optional;
 
 public interface StockRepository extends JpaRepository<StockEntity, String> {
 
-    public StockEntity findByMfNameAndItemNameAndBatchAndStoreIdAndSupplierName(String mFName, String itemName, String batch, String storeId, String supplierName);
+    StockEntity findByMfNameAndItemNameAndBatchAndStoreIdAndSupplierName(String mFName, String itemName, String batch, String storeId, String supplierName);
 
-    public List<StockEntity> findByItemNameContainingAndStoreIdAndItemCategoryAndBalQuantityGreaterThan(String itemName, String storeId, String category, Double balQuantity);
+    List<StockEntity> findByItemNameContainingAndStoreIdAndItemCategoryAndBalQuantityGreaterThan(String itemName, String storeId, String category, Double balQuantity);
 
-    public List<StockEntity> findByItemNameContainingAndStoreIdAndBalQuantityGreaterThan(String itemName, String storeId, Double balQuantity);
+    List<StockEntity> findByItemNameContainingAndStoreIdAndBalQuantityGreaterThan(String itemName, String storeId, Double balQuantity);
 
     Optional<List<StockEntity>> findByStoreId(String storeId);
     
-    public List<StockEntity> findFirstByItemNameContainingAndStoreIdAndBalQuantityGreaterThan(String itemName, String storeId, Double balQuantity);
+    List<StockEntity> findFirstByItemNameContainingAndStoreIdAndBalQuantityGreaterThan(String itemName, String storeId, Double balQuantity);
     
     
 }

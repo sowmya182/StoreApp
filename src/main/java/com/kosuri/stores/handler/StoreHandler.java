@@ -7,9 +7,15 @@ import com.kosuri.stores.model.request.CreateStoreRequest;
 import com.kosuri.stores.model.request.UpdateStoreRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -22,11 +28,40 @@ public class StoreHandler {
     @Autowired
     private StoreRepository storeRepository;
 
+    private final S3Client s3Client;
+
+
+    public StoreHandler(S3Client s3Client) {
+        this.s3Client = s3Client;
+    }
+
     public String addStore(CreateStoreRequest createStoreRequest) throws Exception{
         if(validateStoreInputs(createStoreRequest)) {
+           // uploadFileToS3Bucket(file);
             StoreEntity storeEntity = repositoryHandler.addStoreToRepository(createStoreEntityFromRequest(createStoreRequest));
         }
         return createStoreRequest.getId();
+    }
+
+    private void uploadFileToS3Bucket(MultipartFile file) {
+
+        String bucketName = "rxkolan.in";
+        String key = "uploads/" + file.getOriginalFilename(); // or any other key structure you prefer
+
+        try {
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .build();
+            RequestBody requestBody = RequestBody.fromInputStream(file.getInputStream(), file.getSize());
+
+            s3Client.putObject(putObjectRequest, requestBody);
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
     }
 
     public String updateStore(UpdateStoreRequest updateStoreRequest) throws Exception {
@@ -36,17 +71,9 @@ public class StoreHandler {
         return updateStoreRequest.getId();
     }
 
-    public String getStoreIdFromStoreOwner(String emailId) {
+    public List<StoreEntity> getStoreIdFromStoreOwner(String emailId) {
         Optional<List<StoreEntity>> entity = storeRepository.findByOwnerEmail(emailId);
-        if (entity.isPresent()) {
-            for (StoreEntity store: entity.get()) {
-                if (store.getId().contains("DUMMY")) {
-                    continue;
-                }
-                return store.getId();
-            }
-        }
-        return "";
+        return entity.orElse(null);
     }
 
     public List<String> getStoreIdFromLocation(String location) {
@@ -76,7 +103,11 @@ public class StoreHandler {
     }
 
     private StoreEntity createStoreEntityFromRequest(CreateStoreRequest createStoreRequest){
-        //TODO add location and other fields from request instead of default values.
+
+        LocalDate currentDate = LocalDate.now();
+
+
+
         StoreEntity storeEntity = new StoreEntity();
         storeEntity.setName(createStoreRequest.getName());
         storeEntity.setId(createStoreRequest.getId());
@@ -90,14 +121,27 @@ public class StoreHandler {
         storeEntity.setSecondaryContact(createStoreRequest.getSecondaryContact());
         storeEntity.setRegistrationDate(LocalDate.now().toString());
         storeEntity.setCreationTimeStamp(LocalDateTime.now().toString());
-//        storeEntity.setRole("test");
         storeEntity.setModifiedBy("test_user");
         storeEntity.setModifiedDate(LocalDate.now().toString());
         storeEntity.setModifiedTimeStamp(LocalDateTime.now().toString());
-        storeEntity.setStatus("Active");
-//        storeEntity.setPassword("test");
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            String expirationDateString = createStoreRequest.getExpirationDate();
+            LocalDate expirationDate = LocalDate.parse(expirationDateString, formatter);
+            if (!expirationDateString.isEmpty()) {
+                storeEntity.setStatus(expirationDate.isAfter(currentDate) ? "Active" : "Inactive");
+                storeEntity.setExpiryDate(expirationDate.format(formatter));
+            } else {
+                storeEntity.setStatus("Inactive");
+                storeEntity.setExpiryDate(null);
+            }
+        } catch (DateTimeParseException e) {
+            storeEntity.setStatus("Inactive");
+            storeEntity.setExpiryDate(null);
+        }
         storeEntity.setAddedBy(createStoreRequest.getOwner());
         storeEntity.setLocation(createStoreRequest.getLocation());
+        storeEntity.setStoreVerifiedStatus(createStoreRequest.getStoreVerificationStatus());
 
         return storeEntity;
     }
@@ -123,7 +167,6 @@ public class StoreHandler {
         storeEntity.setModifiedDate(LocalDate.now().toString());
         storeEntity.setModifiedTimeStamp(LocalDateTime.now().toString());
         storeEntity.setStatus(request.getStatus());
-        storeEntity.setPassword("test");
         storeEntity.setAddedBy(request.getOwner());
         storeEntity.setLocation(request.getLocation());
 
@@ -136,7 +179,9 @@ public class StoreHandler {
             throw new APIException("Store with id is already present in system");
         }
 
-        if(request.getOwnerEmail() != null && !request.getOwnerEmail().isEmpty() && request.getOwnerContact() != null && !request.getOwnerContact().isEmpty()){
+        if(request.getOwnerEmail() != null && !request.getOwnerEmail().isEmpty()
+                && request.getOwnerContact() != null && !request.getOwnerContact().isEmpty()
+        && request.getExpirationDate()!=null && !request.getExpirationDate().isEmpty()){
             Optional<List<StoreEntity>> store2 = storeRepository.findByOwnerEmailOrOwnerContact(request.getOwnerEmail(), request.getOwnerContact());
             if(!store2.get().isEmpty()){
                 for(StoreEntity s: store2.get()){
@@ -145,19 +190,27 @@ public class StoreHandler {
                     }
                 }
             }
-            boolean isUserPresent = false;
-            if(!store2.get().isEmpty()){
-                for(StoreEntity s: store2.get()){
-                    if(s.getId().contains("DUMMY") && s.getRole().equals("STORE_MANAGER")){
-                        isUserPresent = true;
-                    }
-                }
+//            boolean isUserPresent = false;
+//            if(!store2.get().isEmpty()){
+//                for(StoreEntity s: store2.get()){
+//                    if (s.getId().contains("DUMMY") && s.getRole().equals("STORE_MANAGER")) {
+//                        isUserPresent = true;
+//                        break;
+//                    }
+//                }
+//            }
+            LocalDate currentDate = LocalDate.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            String expirationDateString = request.getExpirationDate();
+            LocalDate expirationDate = LocalDate.parse(expirationDateString,formatter);
+            if (!expirationDate.isAfter(currentDate)) {
+                throw new APIException("Cannot Add Store As Store Licence Expired.");
             }
 
-            if(!isUserPresent){
-                throw new APIException("Store owner not present as user in system");
-
-            }
+//            if(!isUserPresent){
+//                throw new APIException("Store owner not present as user in system");
+//
+//            }
         }
         return true;
     }
@@ -180,8 +233,9 @@ public class StoreHandler {
             boolean isUserPresent = false;
             if(!store2.get().isEmpty()){
                 for(StoreEntity s: store2.get()){
-                    if(s.getId().contains("DUMMY") && s.getRole().equals("STORE_MANAGER")){
+                    if (s.getId().contains("DUMMY") && s.getRole().equals("STORE_MANAGER")) {
                         isUserPresent = true;
+                        break;
                     }
                 }
             }

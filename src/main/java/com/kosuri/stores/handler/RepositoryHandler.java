@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import at.favre.lib.crypto.bcrypt.BCrypt;
 import com.kosuri.stores.constant.StoreConstants;
 import com.kosuri.stores.dao.*;
 import com.kosuri.stores.model.enums.UserType;
@@ -57,9 +58,11 @@ public class RepositoryHandler {
 
 	public StoreEntity addStoreToRepository(@Valid StoreEntity storeEntity) throws Exception {
 		Optional<StoreEntity> store = storeRepository.findById(storeEntity.getId());
-		boolean storeExistsByOwnerEmail = storeRepository.existsByOwnerEmail(storeEntity.getOwnerEmail());
+		Optional<UserOTPEntity> userOTPEntityOptional = userOTPRepository.findByUserEmailAndActive(storeEntity.getOwnerEmail(),1);
 		if (store.isPresent()) {
 			throw new APIException("Store with this id is already present");
+		}else if (userOTPEntityOptional.isEmpty()){
+			throw new APIException("Store User Not Found ");
 		}
 		return storeRepository.save(storeEntity);
 
@@ -146,39 +149,38 @@ public class RepositoryHandler {
     }
 
 
-	public StoreEntity loginUser(LoginUserRequest request) throws Exception {
-		Optional<List<StoreEntity>> existingStores = storeRepository.findByOwnerEmailOrOwnerContact(request.getEmail(),
+	public TabStoreUserEntity loginUser(LoginUserRequest request) throws Exception {
+
+		Optional<TabStoreUserEntity> tabStoreUserEntityOptional = tabStoreRepository.findByStoreUserEmailOrStoreUserContact(request.getEmail(),
 				request.getPhoneNumber());
-		if (existingStores.isEmpty()) {
+		if (tabStoreUserEntityOptional.isEmpty()) {
 			throw new APIException("Invalid Credentials!");
 		}
-
-		for (StoreEntity store : existingStores.get()) {
-			// TODO Update to query based on id
-			if (store.getPassword() != null && store.getPassword().equals(request.getPassword())
-					&& store.getId().contains("DUMMY")) {
-				System.out.println("User logged in successfully");
-				return store;
-			}
+		TabStoreUserEntity tabStoreUserEntity = tabStoreUserEntityOptional.orElse(null);
+		if (tabStoreUserEntity.getPassword() != null && isValidPassword(request.getPassword(), tabStoreUserEntity.getPassword())) {
+			System.out.println("User logged in successfully");
+			return tabStoreUserEntity;
 		}
 
 		throw new APIException("Invalid Credentials!");
 	}
 
+	private boolean isValidPassword(String password, String encryptedPassword) {
+		BCrypt.Result result = BCrypt.verifyer().verify(password.toCharArray(), encryptedPassword);
+		return result.verified;
+	}
+
 	public boolean validateStoreUser(AddTabStoreUserRequest request) throws Exception {
-		Optional<List<TabStoreUserEntity>> existingStores = tabStoreRepository
+		Optional<TabStoreUserEntity> tabStoreUserEntityOptional = tabStoreRepository
 				.findByStoreUserEmailOrStoreUserContact(request.getUserEmail(), request.getUserPhoneNumber());
-		if (existingStores.isEmpty()) {
+		if (tabStoreUserEntityOptional.isEmpty()) {
 			return true;
 		}
-		for (TabStoreUserEntity store : existingStores.get()) {
-			// TODO Update to query based on id
-			if (store.getStoreUserEmail().contains(request.getUserEmail())) {
+		TabStoreUserEntity tabStoreUserEntity = tabStoreUserEntityOptional.orElse(null);
+			if (tabStoreUserEntity.getStoreUserEmail().contains(request.getUserEmail())) {
 				System.out.println("User already exists in system");
 				throw new APIException("User already exists in system");
 			}
-		}
-
 		return true;
 	}
 

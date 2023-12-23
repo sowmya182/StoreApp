@@ -39,48 +39,4 @@ public class AddTabStoreUserRequest extends RequestEntity<AddTabStoreUserRequest
     private String password;
 	@NotNull
 	private String userType;
-
-	public void setUserFullName(String userFullName) {
-		this.userFullName = userFullName;
-	}
-
-	public void setUserPhoneNumber(String userPhoneNumber) {
-		this.userPhoneNumber = userPhoneNumber;
-	}
-
-	public void setUserEmail(String userEmail) {
-		this.userEmail = userEmail;
-	}
-
-	public void setStatus(String status) {
-		this.status = status;
-	}
-
-	public void setAddedBy(String addedBy) {
-		this.addedBy = addedBy;
-	}
-
-	public void setStoreAdminEmail(String storeAdminEmail) {
-		this.storeAdminEmail = storeAdminEmail;
-	}
-
-	public void setStoreAdminMobile(String storeAdminMobile) {
-		this.storeAdminMobile = storeAdminMobile;
-	}
-
-	public void setStore(String store) {
-		this.store = store;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-	public void setRole(String role) {
-		this.role = role;
-	}
-
-	public void setUserType(String userType) {
-		this.userType = userType;
-	}
 }

@@ -53,7 +53,7 @@ public class PurchaseHandler {
 
             XSSFRow row = worksheet.getRow(i);
 
-            tempPurchase.setDoc_Number(String.valueOf(new BigDecimal(row.getCell(0).getNumericCellValue()).toBigInteger()));
+            tempPurchase.setDoc_Number(String.valueOf(BigDecimal.valueOf(row.getCell(0).getNumericCellValue()).toBigInteger()));
             tempPurchase.setReadableDocNo(row.getCell(1).getStringCellValue());
             tempPurchase.setDate(row.getCell(2).getDateCellValue());
             tempPurchase.setBillNo(row.getCell(3).getStringCellValue());
@@ -63,7 +63,7 @@ public class PurchaseHandler {
             try {
                 tempPurchase.setBatchNo(row.getCell(7).getStringCellValue());
             } catch (Exception e) {
-                tempPurchase.setBatchNo(String.valueOf(new BigDecimal(row.getCell(7).getNumericCellValue()).toBigInteger()));
+                tempPurchase.setBatchNo(String.valueOf(BigDecimal.valueOf(row.getCell(7).getNumericCellValue()).toBigInteger()));
             }
 
             tempPurchase.setExpiryDate(row.getCell(8).getDateCellValue());

@@ -8,7 +8,9 @@ import java.util.Optional;
 
 @Repository
 public interface TabStoreRepository extends JpaRepository<TabStoreUserEntity, String> {
- 
 
-    Optional<List<TabStoreUserEntity>> findByStoreUserEmailOrStoreUserContact(String storeUserEmail, String storeUserContact);
+
+    Optional<TabStoreUserEntity> findByStoreUserEmailOrStoreUserContact(String storeUserEmail, String storeUserContact);
+
+    Optional<TabStoreUserEntity> findByStoreUserEmailAndStoreUserContact(String email, String phoneNumber);
 }

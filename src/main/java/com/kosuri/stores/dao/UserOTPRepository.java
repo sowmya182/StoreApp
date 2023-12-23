@@ -17,5 +17,7 @@ public interface UserOTPRepository extends JpaRepository<UserOTPEntity, String> 
 
     Optional<UserOTPEntity> findByUserEmail(String email);
 
+	Optional<UserOTPEntity> findByUserEmailAndActive(String email, Integer isActive);
+
 	Optional<UserOTPEntity> findByUserPhoneNumber(String phoneNumber);
 }
