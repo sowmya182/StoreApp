@@ -4,10 +4,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import javax.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
@@ -23,11 +25,16 @@ public class TabStoreUserEntity {
     private @Column(name = "store_user_phonenumber", unique=true) String storeUserContact;
     @NotNull
     private @Column(name = "store_user_emailid") String storeUserEmail;
-    private @Column(name = "registraion_date") String registrationDate;
+
+	@Column(name = "registraion_date")
+	@Temporal(TemporalType.TIMESTAMP)
+    private LocalDateTime registrationDate;
     private @Column(name = "addedby") String addedBy;
     private @Column(name = "store_admin_email") String storeAdminEmail;
     private @Column(name = "store_admin_mobile") String storeAdminContact;
     private @Column(name = "status") String status;
     private @Column(name = "password") String password;
     private @Column(name = "user_type") String userType;
+    
+
 }

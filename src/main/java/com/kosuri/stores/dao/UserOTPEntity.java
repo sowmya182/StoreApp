@@ -8,6 +8,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Date;
+
 @Getter
 @Setter
 @Entity
@@ -20,9 +22,9 @@ public class UserOTPEntity {
 	private @Column(name = "created_on") String createdOn;
 	private @Column(name = "updated_on") String updatedOn;
 	private @Column(name = "email") String userEmail;
-	private @Column(name = "email_otp_date") String emailOtpDate;
+	private @Column(name = "email_otp_date") Date emailOtpDate;
 	private @Column(name = "phone_number") String userPhoneNumber;
-	private @Column(name = "phone_otp_date") String phoneOtpDate;
+	private @Column(name = "phone_otp_date") Date phoneOtpDate;
 	private @Column(name = "email_otp") String emailOtp;
 	private @Column(name = "phone_otp") String phoneOtp;
 	private @Column(name = "email_verify") boolean emailVerify;

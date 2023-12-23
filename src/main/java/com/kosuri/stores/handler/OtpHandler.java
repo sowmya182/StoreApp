@@ -10,11 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -50,7 +48,7 @@ public class OtpHandler {
             if (userOtpOptional.isPresent()) {
                 userOtp = userOtpOptional.get();
                 userOtp.setEmailOtp(otp);
-                userOtp.setEmailOtpDate(LocalDateTime.now().toString());
+                userOtp.setEmailOtpDate(new Date());
             }
             userOtpRepository.save(userOtp);
         }
@@ -66,7 +64,7 @@ public class OtpHandler {
             if (userOtpOptional.isPresent()) {
                 UserOTPEntity userOtp = userOtpOptional.get();
                 userOtp.setPhoneOtp(otp);
-                userOtp.setPhoneOtpDate(LocalDateTime.now().toString());
+                userOtp.setPhoneOtpDate(new Date());
                 userOtpRepository.save(userOtp);
             }
         }

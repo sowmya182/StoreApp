@@ -12,29 +12,19 @@ import java.net.URI;
 public class DiagnosticCenterRequest extends RequestEntity<DiagnosticCenterRequest> {
 
 
-    private String serviceId;
-
-    private String userId;
-
-    private String  phoneNumber;
-
-    private String address;
-
-    private String location;
-
-    private String userEmailId;
-
-    private String businessName;
-
+    private String phoneNumber;
+    private String email;
     private String serviceName;
-
-    private String price;
-
-    private String description;
-
+    private String userId;
     private String serviceCategory;
-
+    private String serviceId;
+    private String status;
+    private String pinCode;
+    private String price;
+    private String description;
+    private String updatedBy;
     private String storeId;
+    private String priceUpdatedBy;
     public DiagnosticCenterRequest(HttpMethod method, URI url) {
         super(method, url);
     }

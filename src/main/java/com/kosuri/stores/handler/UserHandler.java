@@ -74,7 +74,7 @@ public class UserHandler {
         storeEntity.setStoreAdminEmail(request.getStoreAdminEmail());
         storeEntity.setPassword(getEncryptedPassword(request.getPassword()));
         storeEntity.setUserType(request.getUserType());
-        storeEntity.setRegistrationDate(LocalDateTime.now().toString());
+        storeEntity.setRegistrationDate(LocalDateTime.now());
         storeEntity.setUserId(genereateUserId());
 
         //setting dummy parameters.

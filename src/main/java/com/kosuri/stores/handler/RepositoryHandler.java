@@ -10,15 +10,13 @@ import at.favre.lib.crypto.bcrypt.BCrypt;
 import com.kosuri.stores.constant.StoreConstants;
 import com.kosuri.stores.dao.*;
 import com.kosuri.stores.model.enums.UserType;
-import com.kosuri.stores.model.request.DiagnosticCenterRequest;
+import com.kosuri.stores.model.request.*;
 import io.micrometer.common.util.StringUtils;
+import org.apache.poi.openxml4j.opc.ZipPackagePart;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.kosuri.stores.exception.APIException;
-import com.kosuri.stores.model.request.AddTabStoreUserRequest;
-import com.kosuri.stores.model.request.AddUserRequest;
-import com.kosuri.stores.model.request.LoginUserRequest;
 
 import jakarta.validation.Valid;
 
@@ -54,6 +52,8 @@ public class RepositoryHandler {
 
 	@Autowired
 	private OtpHandler otpHandler;
+	@Autowired
+	private PrimaryCareCenterRepoistory primaryCareCenterRepoistory;
 
 
 	public StoreEntity addStoreToRepository(@Valid StoreEntity storeEntity) throws Exception {
@@ -256,5 +256,26 @@ public class RepositoryHandler {
 
 	public void saveDiagnosticServiceEntity(DiagnosticServicesEntity serviceEntity) {
 		diagnosticServiceRepository.save(serviceEntity);
+	}
+
+	public boolean isPCActive(PrimaryCareUserRequest request) {
+		Optional<StoreEntity> storeInfoOptional = storeRepository.findById(request.getStoreId());
+		StoreEntity storeEntity = storeInfoOptional.orElse(null);
+		return (Objects.requireNonNull(storeEntity).getStatus().equalsIgnoreCase("true"));
+
+	}
+
+	public void addPrimaryCareCenter(PrimaryCareEntity primaryCareEntity, PrimaryCareUserRequest request) {
+		primaryCareCenterRepoistory.save(primaryCareEntity);
+
+	}
+
+	public PrimaryCareEntity findPrimaryServiceById(String userServiceId) {
+		Optional<PrimaryCareEntity> primaryCareEntityOptional = primaryCareCenterRepoistory.findById(userServiceId);
+		return primaryCareEntityOptional.orElse(null);
+	}
+
+	public void savePrimaryServiceEntity(PrimaryCareEntity serviceEntity) {
+		primaryCareCenterRepoistory.save(serviceEntity);
 	}
 }
