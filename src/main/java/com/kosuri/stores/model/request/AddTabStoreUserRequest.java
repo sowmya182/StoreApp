@@ -17,26 +17,27 @@ public class AddTabStoreUserRequest extends RequestEntity<AddTabStoreUserRequest
         super(method, url);
     }
 
-    @NotNull
+
     private String userFullName;
     @NotNull
     private String userPhoneNumber;
     @NotNull
     private String userEmail;
-    @NotNull
+
     private String status;
-    @NotNull
+
     private String addedBy;
-    @NotNull
+
     private String storeAdminEmail;
-    @NotNull
+
     private String storeAdminMobile;
-    @NotNull
+
     private String role;
-    @NotNull
+
     private String store;
+
     @NotNull
     private String password;
-	@NotNull
+
 	private String userType;
 }
