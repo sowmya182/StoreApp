@@ -128,9 +128,9 @@ public class RepositoryHandler {
 		// TODO Update to query based on id
 		Optional<RoleEntity> role = roleRepository.findByRoleName(request.getRole());
 
-		if (!role.isPresent()) {
-			throw new APIException("Role does not exist. Please enter a valid role");
-		}
+//		if (!role.isPresent()) {
+//			throw new APIException("Role does not exist. Please enter a valid role");
+//		}
 		TabStoreUserEntity user = tabStoreRepository.save(storeEntity);
 		if ( user.getStoreUserEmail() != null) {
 			//sets the EmailId and created Date for UserOTPEnitity
@@ -220,7 +220,7 @@ public class RepositoryHandler {
 	public boolean sendEmailOtp(@Valid TabStoreUserEntity request) {
 		Optional<TabStoreUserEntity> tabStoreUserOptional = tabStoreRepository.findById(request.getUserId());
 		TabStoreUserEntity tabStoreUserEntity = tabStoreUserOptional.orElse(null);
-		if (null != tabStoreUserEntity && tabStoreUserEntity.getUserType().equalsIgnoreCase(UserType.SA.toString())) {
+		if (null != tabStoreUserEntity && null != tabStoreUserEntity.getUserType() && tabStoreUserEntity.getUserType().equalsIgnoreCase(UserType.SA.toString())) {
 			String storeUserEmail = request.getStoreUserEmail();
 			return otpHandler.sendOtpToEmail(storeUserEmail);
 		}
@@ -230,7 +230,8 @@ public class RepositoryHandler {
 	public boolean sendOtpToSMS(@Valid TabStoreUserEntity request) {
 		Optional<TabStoreUserEntity> tabStoreUserOptional = tabStoreRepository.findById(request.getUserId());
 		TabStoreUserEntity tabStoreUserEntity = tabStoreUserOptional.orElse(null);
-		if (null != tabStoreUserEntity && tabStoreUserEntity.getUserType().equalsIgnoreCase(UserType.SA.toString())) {
+		if (null != tabStoreUserEntity && null != tabStoreUserEntity.getUserType() &&
+				tabStoreUserEntity.getUserType().equalsIgnoreCase(UserType.SA.toString())) {
 			String storeUserPhoneNumber = request.getStoreUserContact();
 			return otpHandler.sendOtpToPhoneNumber(storeUserPhoneNumber);
 		}

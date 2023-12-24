@@ -5,6 +5,7 @@ import com.kosuri.stores.constant.StoreConstants;
 import com.kosuri.stores.dao.StoreEntity;
 import com.kosuri.stores.dao.TabStoreUserEntity;
 import com.kosuri.stores.exception.APIException;
+import com.kosuri.stores.model.enums.UserType;
 import com.kosuri.stores.model.request.AddTabStoreUserRequest;
 import com.kosuri.stores.model.request.AddUserRequest;
 import com.kosuri.stores.model.request.LoginUserRequest;
@@ -73,7 +74,7 @@ public class UserHandler {
         storeEntity.setStoreAdminContact(request.getStoreAdminMobile());
         storeEntity.setStoreAdminEmail(request.getStoreAdminEmail());
         storeEntity.setPassword(getEncryptedPassword(request.getPassword()));
-        storeEntity.setUserType(request.getUserType());
+        storeEntity.setUserType((null!=request.getUserType())?request.getUserType(): UserType.SA.toString());
         storeEntity.setRegistrationDate(LocalDateTime.now());
         storeEntity.setUserId(genereateUserId());
 
