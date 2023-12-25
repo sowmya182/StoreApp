@@ -12,5 +12,9 @@ public interface TabStoreRepository extends JpaRepository<TabStoreUserEntity, St
 
     Optional<TabStoreUserEntity> findByStoreUserEmailOrStoreUserContact(String storeUserEmail, String storeUserContact);
 
-    Optional<TabStoreUserEntity> findByStoreUserEmailAndStoreUserContact(String email, String phoneNumber);
+    Optional<TabStoreUserEntity> findByStoreUserEmail(String email);
+
+    Optional<TabStoreUserEntity> findByStoreUserContact(String phoneNumber);
+
+    TabStoreUserEntity findByStoreUserEmailAndStoreUserContact(String emailAddress, String userContactNumber);
 }

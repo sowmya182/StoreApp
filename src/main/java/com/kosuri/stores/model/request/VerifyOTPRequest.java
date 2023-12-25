@@ -1,4 +1,4 @@
-package com.kosuri.stores.request;
+package com.kosuri.stores.model.request;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class OTPRequest {
+public class VerifyOTPRequest {
 
     @NonNull
     private String otp;

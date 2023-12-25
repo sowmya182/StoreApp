@@ -11,14 +11,14 @@ import com.kosuri.stores.constant.StoreConstants;
 import com.kosuri.stores.dao.*;
 import com.kosuri.stores.model.enums.UserType;
 import com.kosuri.stores.model.request.*;
-import io.micrometer.common.util.StringUtils;
-import org.apache.poi.openxml4j.opc.ZipPackagePart;
+import com.kosuri.stores.model.request.OTPRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.kosuri.stores.exception.APIException;
 
 import jakarta.validation.Valid;
+import org.springframework.util.ObjectUtils;
 
 @Service
 public class RepositoryHandler {
@@ -141,12 +141,20 @@ public class RepositoryHandler {
 			userOtp.setCreatedOn(LocalDateTime.now().toString());
 			userOtp.setUserPhoneNumber(storeEntity.getStoreUserContact());
 			userOTPRepository.save(userOtp);
-			boolean isMessageSent = sendEmailOtp(storeEntity);
-			boolean isPhoneOtpSent = sendOtpToSMS(storeEntity);
+			OTPRequest otpRequest = createOTPRequest(storeEntity.getStoreUserEmail(),storeEntity.getStoreUserContact());
+			boolean isMessageSent = sendEmailOtp(otpRequest);
+			boolean isPhoneOtpSent = sendOtpToSMS(otpRequest);
 			return true;
 		}
 		return false;
     }
+
+	private OTPRequest createOTPRequest(String storeUserEmail, String storeUserContact) {
+		OTPRequest otpRequest = new OTPRequest();
+		otpRequest.setEmail(storeUserEmail);
+		otpRequest.setPhoneNumber(storeUserContact);
+		return otpRequest;
+	}
 
 
 	public TabStoreUserEntity loginUser(LoginUserRequest request) throws Exception {
@@ -217,22 +225,22 @@ public class RepositoryHandler {
 		}
 	}
 
-	public boolean sendEmailOtp(@Valid TabStoreUserEntity request) {
-		Optional<TabStoreUserEntity> tabStoreUserOptional = tabStoreRepository.findById(request.getUserId());
+	public boolean sendEmailOtp(@Valid OTPRequest request) {
+		Optional<TabStoreUserEntity> tabStoreUserOptional = tabStoreRepository.findByStoreUserEmail(request.getEmail());
 		TabStoreUserEntity tabStoreUserEntity = tabStoreUserOptional.orElse(null);
 		if (null != tabStoreUserEntity && null != tabStoreUserEntity.getUserType() && tabStoreUserEntity.getUserType().equalsIgnoreCase(UserType.SA.toString())) {
-			String storeUserEmail = request.getStoreUserEmail();
+			String storeUserEmail = request.getEmail();
 			return otpHandler.sendOtpToEmail(storeUserEmail);
 		}
 		return false;
 	}
 
-	public boolean sendOtpToSMS(@Valid TabStoreUserEntity request) {
-		Optional<TabStoreUserEntity> tabStoreUserOptional = tabStoreRepository.findById(request.getUserId());
+	public boolean sendOtpToSMS(@Valid OTPRequest request) {
+		Optional<TabStoreUserEntity> tabStoreUserOptional = tabStoreRepository.findByStoreUserContact(request.getPhoneNumber());
 		TabStoreUserEntity tabStoreUserEntity = tabStoreUserOptional.orElse(null);
 		if (null != tabStoreUserEntity && null != tabStoreUserEntity.getUserType() &&
 				tabStoreUserEntity.getUserType().equalsIgnoreCase(UserType.SA.toString())) {
-			String storeUserPhoneNumber = request.getStoreUserContact();
+			String storeUserPhoneNumber = request.getPhoneNumber();
 			return otpHandler.sendOtpToPhoneNumber(storeUserPhoneNumber);
 		}
 		return false;
@@ -278,5 +286,15 @@ public class RepositoryHandler {
 
 	public void savePrimaryServiceEntity(PrimaryCareEntity serviceEntity) {
 		primaryCareCenterRepoistory.save(serviceEntity);
+	}
+
+	public boolean updatePassword(TabStoreUserEntity tabStoreUserEntity) {
+		TabStoreUserEntity tabStoreUserResponse = tabStoreRepository.save(tabStoreUserEntity);
+		return (!ObjectUtils.isEmpty(tabStoreUserResponse));
+	}
+
+	public TabStoreUserEntity getTabStoreUser(String emailAddress, String userContactNumber) {
+		Optional<TabStoreUserEntity> tabStoreUserEntityOptional = tabStoreRepository.findByStoreUserEmailOrStoreUserContact(emailAddress,userContactNumber);
+		return tabStoreUserEntityOptional.orElse(null);
 	}
 }

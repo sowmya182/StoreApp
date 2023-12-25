@@ -1,7 +1,7 @@
 package com.kosuri.stores.controller;
 
 import com.kosuri.stores.constant.StoreConstants;
-import com.kosuri.stores.request.OTPRequest;
+import com.kosuri.stores.model.request.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,9 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kosuri.stores.exception.APIException;
 import com.kosuri.stores.handler.UserHandler;
-import com.kosuri.stores.model.request.AddTabStoreUserRequest;
-import com.kosuri.stores.model.request.AddUserRequest;
-import com.kosuri.stores.model.request.LoginUserRequest;
 import com.kosuri.stores.model.response.GenericResponse;
 import com.kosuri.stores.model.response.LoginUserResponse;
 import com.kosuri.stores.model.response.OTPResponse;
@@ -90,15 +87,76 @@ public class UserController {
 		return ResponseEntity.status(httpStatus).body(response);
 	}
 
+	@PostMapping("/changePassword")
+	public ResponseEntity<GenericResponse> changePassword(@Valid @RequestBody PasswordRequest request) {
+		HttpStatus httpStatus;
+		GenericResponse response = new GenericResponse();
+		try {
+			if (request.isForgetPassword()){
+				userHandler.forgetPassword(request);
+			}else{
+				response = userHandler.changePassword(request,false);
+			}
+
+			httpStatus = HttpStatus.OK;
+
+		} catch (APIException e) {
+			httpStatus = HttpStatus.BAD_REQUEST;
+			response.setResponseMessage(e.getMessage());
+		} catch (Exception e) {
+			httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+			response.setResponseMessage(e.getMessage());
+		}
+
+		return ResponseEntity.status(httpStatus).body(response);
+	}
+
+	@PostMapping("/verifyForgetPassword")
+	public ResponseEntity<GenericResponse> verifyOTPAndChangePassword(
+			@Valid @RequestBody PasswordRequest request) {
+		HttpStatus httpStatus;
+		GenericResponse response = new GenericResponse();
+		try {
+			response = userHandler.verifyOTPAndChangePassword(request);
+			httpStatus = HttpStatus.OK;
+
+		} catch (APIException e) {
+			httpStatus = HttpStatus.BAD_REQUEST;
+			response.setResponseMessage(e.getMessage());
+		} catch (Exception e) {
+			httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+			response.setResponseMessage(e.getMessage());
+		}
+
+		return ResponseEntity.status(httpStatus).body(response);
+	}
+
 	@PostMapping("/sendEmailOtp")
-	public ResponseEntity<OTPResponse> sendEmailOTP(@Valid AddTabStoreUserRequest request) {
+	public ResponseEntity<OTPResponse> sendEmailOTP(@Valid OTPRequest request) {
 		HttpStatus httpStatus;
 		OTPResponse response = new OTPResponse();
 		try {
 			boolean isOtpSend = userHandler.sendEmailOtp(request);
 			httpStatus = HttpStatus.OK;
 			if (isOtpSend) {
-				response.setOtp("OTP Send Successfully");
+				response.setOtp("OTP Send To Email Successfully");
+			}
+		} catch (Exception e) {
+			httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+			response.setOtp(e.getMessage());
+		}
+		return ResponseEntity.status(httpStatus).body(response);
+	}
+
+	@PostMapping("/sendPhoneOtp")
+	public ResponseEntity<OTPResponse> sendPhoneOTP(@Valid OTPRequest request) {
+		HttpStatus httpStatus;
+		OTPResponse response = new OTPResponse();
+		try {
+			boolean isOtpSend = userHandler.sendOTPToPhone(request);
+			httpStatus = HttpStatus.OK;
+			if (isOtpSend) {
+				response.setOtp("OTP Send To Phone Successfully");
 			}
 		} catch (Exception e) {
 			httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
@@ -108,11 +166,11 @@ public class UserController {
 	}
 
 	@PostMapping("/verifyEmailOTP")
-	public ResponseEntity<GenericResponse> verifyEmailOTP(@Valid @RequestBody OTPRequest emailOtp) {
+	public ResponseEntity<GenericResponse> verifyEmailOTP(@Valid @RequestBody VerifyOTPRequest emailOtp) {
 		HttpStatus httpStatus;
 		GenericResponse response = new GenericResponse();
 		try {
-			boolean isEmailVerified = userHandler.verifyEmailOTP(emailOtp.getEmail(), emailOtp.getOtp());
+			boolean isEmailVerified = userHandler.verifyEmailOTP(emailOtp);
 			httpStatus = HttpStatus.OK;
 			if (isEmailVerified) {
 				response.setResponseMessage("Email Verification Success");
@@ -130,7 +188,7 @@ public class UserController {
 	}
 
 	@PostMapping("/verifySmsOTP")
-	public ResponseEntity<GenericResponse> verifySMSOTP(@Valid @RequestBody OTPRequest smsOtp) {
+	public ResponseEntity<GenericResponse> verifySMSOTP(@Valid @RequestBody VerifyOTPRequest smsOtp) {
 		HttpStatus httpStatus;
 		GenericResponse response = new GenericResponse();
 		try {

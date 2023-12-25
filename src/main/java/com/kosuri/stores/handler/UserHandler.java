@@ -6,12 +6,11 @@ import com.kosuri.stores.dao.StoreEntity;
 import com.kosuri.stores.dao.TabStoreUserEntity;
 import com.kosuri.stores.exception.APIException;
 import com.kosuri.stores.model.enums.UserType;
-import com.kosuri.stores.model.request.AddTabStoreUserRequest;
-import com.kosuri.stores.model.request.AddUserRequest;
-import com.kosuri.stores.model.request.LoginUserRequest;
+import com.kosuri.stores.model.request.*;
+import com.kosuri.stores.model.response.GenericResponse;
 import com.kosuri.stores.model.response.LoginUserResponse;
 
-import com.kosuri.stores.request.OTPRequest;
+import io.micrometer.common.util.StringUtils;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +19,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 @Service
 public class UserHandler {
@@ -78,17 +74,88 @@ public class UserHandler {
         storeEntity.setRegistrationDate(LocalDateTime.now());
         storeEntity.setUserId(genereateUserId());
 
-        //setting dummy parameters.
-		/*
-		 * if(request.getUserPhoneNumber() != null){ storeEntity.setId("DUMMY" +
-		 * request.getUserPhoneNumber());
-		 *
-		 * }else{ storeEntity.setId("DUMMY" + request.getUserEmail()); }
-		 */
         storeEntity.setAddedBy("admin");
 
         return storeEntity;
     }
+
+    public GenericResponse changePassword(PasswordRequest request,boolean isForgetPassword) throws Exception {
+        TabStoreUserEntity tabStoreUserEntity = repositoryHandler.getTabStoreUser(request.getEmailAddress(),request.getUserContactNumber());
+        GenericResponse response = new GenericResponse();
+        if (tabStoreUserEntity != null && request.getPassword().equals(request.getConfirmPassword()) ){
+            boolean isPasswordSame= checkPassword(request.getPassword(), tabStoreUserEntity.getPassword());
+
+            if(!isPasswordSame) {
+                updatePassword(request, tabStoreUserEntity, response);
+            }else{
+                if (isForgetPassword){
+                    updatePassword(request, tabStoreUserEntity, response);
+                }else{
+                    response.setResponseMessage("Password is same. Please set a new Password");
+                }
+            }
+            return response;
+        }
+        return response;
+    }
+
+    private void updatePassword(PasswordRequest request, TabStoreUserEntity tabStoreUserEntity, GenericResponse response) {
+        tabStoreUserEntity.setPassword(getEncryptedPassword(request.getPassword()));
+        boolean isPasswordUpdated = repositoryHandler.updatePassword(tabStoreUserEntity);
+        if (isPasswordUpdated) {
+            response.setResponseMessage("Password Updated Successfully");
+        }
+    }
+
+    public void forgetPassword(PasswordRequest request) throws Exception{
+        if (!StringUtils.isEmpty(request.getEmailAddress())
+                || !StringUtils.isEmpty(request.getUserContactNumber())){
+            TabStoreUserEntity tabStoreUserEntity =
+                    repositoryHandler.getTabStoreUser(request.getEmailAddress(),request.getUserContactNumber());
+            GenericResponse response = new GenericResponse();
+            OTPRequest otpRequest = new OTPRequest();
+            if (null != tabStoreUserEntity) {
+               boolean isOTPSend =  sendOTP(request, otpRequest);
+            }
+        }
+    }
+
+    public GenericResponse verifyOTPAndChangePassword(PasswordRequest request) throws Exception{
+        GenericResponse genericResponse = new GenericResponse();
+        if (!StringUtils.isEmpty(request.getEmailAddress())
+                || !StringUtils.isEmpty(request.getUserContactNumber())){
+            boolean isOtpVerified = false;
+            VerifyOTPRequest verifyOTPRequest =  new VerifyOTPRequest();
+            verifyOTPRequest.setOtp(request.getOtp());
+                if(null != request.getEmailAddress()) {
+                    verifyOTPRequest.setEmail(request.getEmailAddress());
+                    isOtpVerified = verifyEmailOTP(verifyOTPRequest);
+                }else if (!StringUtils.isEmpty(request.getUserContactNumber())){
+                    verifyOTPRequest.setPhoneNumber(request.getUserContactNumber());
+                    isOtpVerified = verifySmsOTP(verifyOTPRequest);
+                }
+             if (isOtpVerified){
+                 genericResponse =  changePassword(request,true);
+             }
+        }
+        return genericResponse;
+    }
+
+    private boolean sendOTP(PasswordRequest request, OTPRequest otpRequest) {
+
+        if (null != request.getEmailAddress()) {
+            otpRequest.setEmail(request.getEmailAddress());
+            return sendEmailOtp(otpRequest);
+        } else {
+            otpRequest.setPhoneNumber(request.getUserContactNumber());
+           return  sendOTPToPhone(otpRequest);
+        }
+    }
+
+    private boolean checkPassword(String plainPassword, String hashedPassword) {
+        return BCrypt.verifyer().verify(plainPassword.toCharArray(), hashedPassword).verified;
+    }
+
 
     private String getEncryptedPassword(String password) {
         return BCrypt.withDefaults().hashToString(12, password.toCharArray());
@@ -118,6 +185,8 @@ public class UserHandler {
         return response;
     }
 
+
+
     private StoreEntity getEntityFromUserRequest(AddUserRequest request){
         StoreEntity storeEntity = new StoreEntity();
         storeEntity.setOwner(request.getName());
@@ -138,14 +207,20 @@ public class UserHandler {
 
         return storeEntity;
     }
-	public boolean verifyEmailOTP(String email, @Valid String emailOtp) {
-		return repositoryHandler.verifyEmailOtp(email,emailOtp);
+	public boolean verifyEmailOTP(VerifyOTPRequest emailOtp) {
+		return repositoryHandler.verifyEmailOtp(emailOtp.getEmail(), emailOtp.getOtp());
 	}
-	public boolean verifySmsOTP(@Valid OTPRequest smsOtp) {
+	public boolean verifySmsOTP(@Valid VerifyOTPRequest smsOtp) {
 		 return repositoryHandler.verifyPhoneOtp(smsOtp.getOtp(), smsOtp.getPhoneNumber());
 	}
-	public boolean sendEmailOtp(@Valid AddTabStoreUserRequest request) {
-        TabStoreUserEntity entity = new TabStoreUserEntity();
-		return repositoryHandler.sendEmailOtp(entity);
+	public boolean sendEmailOtp(@Valid OTPRequest request) {
+		return repositoryHandler.sendEmailOtp(request);
 	}
+
+    public boolean sendOTPToPhone(OTPRequest request) {
+        return repositoryHandler.sendOtpToSMS(request);
+    }
+
+
+
 }

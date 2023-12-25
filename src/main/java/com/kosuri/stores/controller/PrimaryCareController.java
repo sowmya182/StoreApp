@@ -1,13 +1,8 @@
 package com.kosuri.stores.controller;
-import com.kosuri.stores.constant.StoreConstants;
 import com.kosuri.stores.exception.APIException;
 import com.kosuri.stores.handler.PrimaryCareHandler;
-import com.kosuri.stores.handler.UserHandler;
 import com.kosuri.stores.model.request.*;
 import com.kosuri.stores.model.response.GenericResponse;
-import com.kosuri.stores.model.response.LoginUserResponse;
-import com.kosuri.stores.model.response.OTPResponse;
-import com.kosuri.stores.request.OTPRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
