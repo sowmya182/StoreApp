@@ -83,16 +83,16 @@ public class UserHandler {
         TabStoreUserEntity tabStoreUserEntity = repositoryHandler.getTabStoreUser(request.getEmailAddress(),request.getUserContactNumber());
         GenericResponse response = new GenericResponse();
         if (tabStoreUserEntity != null && request.getPassword().equals(request.getConfirmPassword()) ){
-            boolean isPasswordSame= checkPassword(request.getPassword(), tabStoreUserEntity.getPassword());
+            boolean isPasswordNotSame= checkPassword(request.getPassword(), tabStoreUserEntity.getPassword());
 
-            if(!isPasswordSame) {
-                updatePassword(request, tabStoreUserEntity, response);
-            }else{
+            if(isPasswordNotSame) {
                 if (isForgetPassword){
                     updatePassword(request, tabStoreUserEntity, response);
                 }else{
                     response.setResponseMessage("Password is same. Please set a new Password");
                 }
+            }else{
+                updatePassword(request, tabStoreUserEntity, response);
             }
             return response;
         }
@@ -107,17 +107,20 @@ public class UserHandler {
         }
     }
 
-    public void forgetPassword(PasswordRequest request) throws Exception{
+    public GenericResponse forgetPassword(PasswordRequest request) throws Exception{
+        GenericResponse response = new GenericResponse();
         if (!StringUtils.isEmpty(request.getEmailAddress())
                 || !StringUtils.isEmpty(request.getUserContactNumber())){
             TabStoreUserEntity tabStoreUserEntity =
                     repositoryHandler.getTabStoreUser(request.getEmailAddress(),request.getUserContactNumber());
-            GenericResponse response = new GenericResponse();
             OTPRequest otpRequest = new OTPRequest();
             if (null != tabStoreUserEntity) {
-               boolean isOTPSend =  sendOTP(request, otpRequest);
+                otpRequest.setIsForgetPassword(true);
+               sendOTP(request, otpRequest);
+               response.setResponseMessage("Forget Password Initiated");
             }
         }
+        return response;
     }
 
     public GenericResponse verifyOTPAndChangePassword(PasswordRequest request) throws Exception{
@@ -127,6 +130,7 @@ public class UserHandler {
             boolean isOtpVerified = false;
             VerifyOTPRequest verifyOTPRequest =  new VerifyOTPRequest();
             verifyOTPRequest.setOtp(request.getOtp());
+            verifyOTPRequest.setIsForgetPassword(true);
                 if(null != request.getEmailAddress()) {
                     verifyOTPRequest.setEmail(request.getEmailAddress());
                     isOtpVerified = verifyEmailOTP(verifyOTPRequest);
@@ -208,10 +212,10 @@ public class UserHandler {
         return storeEntity;
     }
 	public boolean verifyEmailOTP(VerifyOTPRequest emailOtp) {
-		return repositoryHandler.verifyEmailOtp(emailOtp.getEmail(), emailOtp.getOtp());
+		return repositoryHandler.verifyEmailOtp(emailOtp);
 	}
 	public boolean verifySmsOTP(@Valid VerifyOTPRequest smsOtp) {
-		 return repositoryHandler.verifyPhoneOtp(smsOtp.getOtp(), smsOtp.getPhoneNumber());
+		 return repositoryHandler.verifyPhoneOtp(smsOtp);
 	}
 	public boolean sendEmailOtp(@Valid OTPRequest request) {
 		return repositoryHandler.sendEmailOtp(request);

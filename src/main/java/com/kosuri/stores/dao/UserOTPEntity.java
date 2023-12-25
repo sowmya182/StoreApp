@@ -29,5 +29,6 @@ public class UserOTPEntity {
 	private @Column(name = "phone_otp") String phoneOtp;
 	private @Column(name = "email_verify") boolean emailVerify;
 	private @Column(name = "sms_verify") boolean smsVerify;
+	private @Column(name = "forget_password_otp") String forgetPasswordOtp;
 	
 }

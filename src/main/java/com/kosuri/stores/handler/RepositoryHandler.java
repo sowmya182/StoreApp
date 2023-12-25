@@ -192,45 +192,58 @@ public class RepositoryHandler {
 		return true;
 	}
 
-	public boolean verifyEmailOtp(@Valid String email, @Valid String emailOtp) {
-		Optional<UserOTPEntity> userOtpEntityOptional = userOTPRepository.findByUserEmailAndEmailOtp(email,emailOtp);
-		UserOTPEntity userOtpEntity = userOtpEntityOptional.orElse(null);
+	public boolean verifyEmailOtp(VerifyOTPRequest verifyOTPRequest) {
+		String email = verifyOTPRequest.getEmail();
+		String emailOtp = verifyOTPRequest.getOtp();
+		UserOTPEntity userOtpEntity = userOTPRepository.findByUserEmailAndEmailOtpOrForgetEmailOtp(email,emailOtp);
+
+			if (userOtpEntity != null) {
+				if (verifyOTPRequest.getIsForgetPassword()) {
+                    return userOtpEntity.getActive() != null
+                            && userOtpEntity.getActive() == 1;
+				} else {
+					StoreConstants.IS_EMAIL_ALREADY_VERIFIED = userOtpEntity.isEmailVerify();
+					if (!userOtpEntity.isEmailVerify()) {
+						userOtpEntity.setEmailVerify(true);
+						userOtpEntity.setActive(1);
+						userOtpEntity.setUpdatedOn(LocalTime.now().toString());
+						userOTPRepository.save(userOtpEntity);
+						return true;
+					}
+				}
+			}
+		return false;
+	}
+
+	public boolean verifyPhoneOtp(VerifyOTPRequest verifyOTPRequest) {
+		String phoneOtp = verifyOTPRequest.getOtp();
+		String phoneNumber = verifyOTPRequest.getPhoneNumber();
+		UserOTPEntity userOtpEntity = userOTPRepository.findByUserPhoneNumberAndPhoneOtpOrForgetEmailOtp(phoneNumber,phoneOtp);
 
 		if (userOtpEntity != null) {
-			StoreConstants.IS_EMAIL_ALREADY_VERIFIED = userOtpEntity.isEmailVerify();
-			if (!userOtpEntity.isEmailVerify()){
-				userOtpEntity.setEmailVerify(true);
+			if (verifyOTPRequest.getIsForgetPassword()) {
+				return userOtpEntity.getActive() != null
+						&& userOtpEntity.getActive() == 1;
+			} else{
+				userOtpEntity.setSmsVerify(true);
 				userOtpEntity.setActive(1);
 				userOtpEntity.setUpdatedOn(LocalTime.now().toString());
 				userOTPRepository.save(userOtpEntity);
 				return true;
 			}
-		} else {
-			return false;
 		}
 		return false;
-	}
-
-	public boolean verifyPhoneOtp(@Valid String phoneOtp, @Valid String phoneNumber) {
-		Optional<UserOTPEntity> userOtpEntityOptional = userOTPRepository.findByUserPhoneNumberAndPhoneOtp(phoneNumber,phoneOtp);
-		UserOTPEntity userOtpEntity = userOtpEntityOptional.orElse(null);
-		if (userOtpEntity != null) {
-			userOtpEntity.setSmsVerify(true);
-			userOtpEntity.setActive(1);
-			userOtpEntity.setUpdatedOn(LocalTime.now().toString());
-			userOTPRepository.save(userOtpEntity);
-			return true;
-		} else {
-			return false;
-		}
 	}
 
 	public boolean sendEmailOtp(@Valid OTPRequest request) {
 		Optional<TabStoreUserEntity> tabStoreUserOptional = tabStoreRepository.findByStoreUserEmail(request.getEmail());
 		TabStoreUserEntity tabStoreUserEntity = tabStoreUserOptional.orElse(null);
-		if (null != tabStoreUserEntity && null != tabStoreUserEntity.getUserType() && tabStoreUserEntity.getUserType().equalsIgnoreCase(UserType.SA.toString())) {
+		if (null != tabStoreUserEntity &&
+				null != tabStoreUserEntity.getUserType() &&
+				tabStoreUserEntity.getUserType().equalsIgnoreCase(UserType.SA.toString())) {
 			String storeUserEmail = request.getEmail();
-			return otpHandler.sendOtpToEmail(storeUserEmail);
+			return (request.getIsForgetPassword() ? otpHandler.sendOtpToEmail(storeUserEmail, true):
+					otpHandler.sendOtpToEmail(storeUserEmail, false));
 		}
 		return false;
 	}

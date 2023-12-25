@@ -88,16 +88,16 @@ public class UserController {
 	}
 
 	@PostMapping("/changePassword")
-	public ResponseEntity<GenericResponse> changePassword(@Valid @RequestBody PasswordRequest request) {
+	public ResponseEntity<GenericResponse> changePassword(@RequestBody PasswordRequest request) {
 		HttpStatus httpStatus;
 		GenericResponse response = new GenericResponse();
 		try {
-			if (request.isForgetPassword()){
-				userHandler.forgetPassword(request);
+			if (request.getIsForgetPassword()){
+				response = userHandler.forgetPassword(request);
+
 			}else{
 				response = userHandler.changePassword(request,false);
 			}
-
 			httpStatus = HttpStatus.OK;
 
 		} catch (APIException e) {
@@ -170,6 +170,7 @@ public class UserController {
 		HttpStatus httpStatus;
 		GenericResponse response = new GenericResponse();
 		try {
+			emailOtp.setIsForgetPassword(false);
 			boolean isEmailVerified = userHandler.verifyEmailOTP(emailOtp);
 			httpStatus = HttpStatus.OK;
 			if (isEmailVerified) {
@@ -192,6 +193,7 @@ public class UserController {
 		HttpStatus httpStatus;
 		GenericResponse response = new GenericResponse();
 		try {
+			smsOtp.setIsForgetPassword(false);
 			boolean isEmailVerified = userHandler.verifySmsOTP(smsOtp);
 			httpStatus = HttpStatus.OK;
 			if (isEmailVerified) {

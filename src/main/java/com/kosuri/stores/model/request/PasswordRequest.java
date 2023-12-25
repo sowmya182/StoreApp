@@ -12,6 +12,6 @@ public class PasswordRequest {
     private String password;
     private String confirmPassword;
     private String otp;
-    private boolean isForgetPassword;
+    private Boolean isForgetPassword;
 
 }

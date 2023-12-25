@@ -1,17 +1,13 @@
 package com.kosuri.stores.handler;
 
 
-import com.kosuri.stores.dao.TabStoreUserEntity;
 import com.kosuri.stores.dao.UserOTPEntity;
 import com.kosuri.stores.dao.UserOTPRepository;
-import com.kosuri.stores.model.request.AddTabStoreUserRequest;
 import com.kosuri.stores.template.EmailTemplate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -32,7 +28,7 @@ public class OtpHandler {
     private UserOTPRepository userOtpRepository;
 
 
-    public boolean sendOtpToEmail(String email) {
+    public boolean sendOtpToEmail(String email, Boolean isForgetPassword) {
         //Generate The Template to send OTP
         Optional<UserOTPEntity> userOtpOptional = userOtpRepository.findByUserEmail(email);
         String otp = OtpHandler.generateOTP(true);
@@ -47,7 +43,11 @@ public class OtpHandler {
             UserOTPEntity userOtp = new UserOTPEntity();
             if (userOtpOptional.isPresent()) {
                 userOtp = userOtpOptional.get();
-                userOtp.setEmailOtp(otp);
+                if (isForgetPassword){
+                    userOtp.setForgetPasswordOtp(otp);
+                }else{
+                    userOtp.setEmailOtp(otp);
+                }
                 userOtp.setEmailOtpDate(new Date());
             }
             userOtpRepository.save(userOtp);

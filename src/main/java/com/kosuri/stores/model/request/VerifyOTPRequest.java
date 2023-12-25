@@ -12,4 +12,5 @@ public class VerifyOTPRequest {
     private String otp;
     private String email;
     private String phoneNumber;
+    private Boolean isForgetPassword;
 }
