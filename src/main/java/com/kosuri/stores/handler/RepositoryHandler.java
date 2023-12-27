@@ -153,6 +153,7 @@ public class RepositoryHandler {
 		OTPRequest otpRequest = new OTPRequest();
 		otpRequest.setEmail(storeUserEmail);
 		otpRequest.setPhoneNumber(storeUserContact);
+		otpRequest.setIsForgetPassword(false);
 		return otpRequest;
 	}
 
