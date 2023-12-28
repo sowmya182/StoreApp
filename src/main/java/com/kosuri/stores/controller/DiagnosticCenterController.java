@@ -21,10 +21,16 @@ public class DiagnosticCenterController {
     public ResponseEntity<GenericResponse> addUser(@Valid @RequestBody DiagnosticCenterRequest request) {
         HttpStatus httpStatus;
         GenericResponse response = new GenericResponse();
+        boolean isDcAdded = false;
         try {
-            diagnosticHandler.addDiagnosticCenter(request);
+            isDcAdded =  diagnosticHandler.addDiagnosticCenter(request);
             httpStatus = HttpStatus.OK;
-            response.setResponseMessage("Diagnostic Center added successfully");
+            if (isDcAdded){
+                response.setResponseMessage("Diagnostic Center added successfully");
+            } else{
+                response.setResponseMessage("Unable To Add Diagnostic Center Cannot");
+            }
+
         } catch (APIException e) {
             httpStatus = HttpStatus.BAD_REQUEST;
             response.setResponseMessage(e.getMessage());
@@ -40,10 +46,16 @@ public class DiagnosticCenterController {
     public ResponseEntity<GenericResponse> updateDiagnosticCenter(@Valid @RequestBody DiagnosticCenterRequest request) {
         HttpStatus httpStatus;
         GenericResponse response = new GenericResponse();
+        boolean isDcUpdated = false;
         try {
-            diagnosticHandler.updateDiagnosticCenter(request);
+            isDcUpdated = diagnosticHandler.updateDiagnosticCenter(request);
             httpStatus = HttpStatus.OK;
-            response.setResponseMessage("Diagnostic Center updated successfully");
+            if (isDcUpdated){
+                response.setResponseMessage("Diagnostic Center updated successfully");
+            } else{
+                response.setResponseMessage("Diagnostic Center Cannot Be Updated");
+            }
+
         } catch (APIException e) {
             httpStatus = HttpStatus.BAD_REQUEST;
             response.setResponseMessage(e.getMessage());

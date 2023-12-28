@@ -33,7 +33,7 @@ public class UserHandler {
 
 
     public boolean addUser(AddUserRequest request) throws Exception {
-        if(!repositoryHandler.validateuser(request)){
+        if(!repositoryHandler.validateUser(request)){
             return false;
         }
         StoreEntity userStoreEntity = getEntityFromUserRequest(request);

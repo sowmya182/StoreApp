@@ -72,7 +72,6 @@ public class UserController {
 			boolean isUserAdded = userHandler.addUser(request);
 			httpStatus = HttpStatus.OK;
 			if (isUserAdded){
-
 				response.setResponseMessage("User added successfully and Otp Send to the User Email and Mobile");
 			}
 
@@ -132,7 +131,7 @@ public class UserController {
 	}
 
 	@PostMapping("/sendEmailOtp")
-	public ResponseEntity<OTPResponse> sendEmailOTP(@Valid OTPRequest request) {
+	public ResponseEntity<OTPResponse> sendEmailOTP(@Valid @RequestBody OTPRequest request) {
 		HttpStatus httpStatus;
 		OTPResponse response = new OTPResponse();
 		try {
@@ -140,6 +139,8 @@ public class UserController {
 			httpStatus = HttpStatus.OK;
 			if (isOtpSend) {
 				response.setOtp("OTP Send To Email Successfully");
+			}else{
+				response.setOtp("OTP Send Failed.Please Check Email");
 			}
 		} catch (Exception e) {
 			httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
@@ -149,7 +150,7 @@ public class UserController {
 	}
 
 	@PostMapping("/sendPhoneOtp")
-	public ResponseEntity<OTPResponse> sendPhoneOTP(@Valid OTPRequest request) {
+	public ResponseEntity<OTPResponse> sendPhoneOTP(@Valid @RequestBody OTPRequest request) {
 		HttpStatus httpStatus;
 		OTPResponse response = new OTPResponse();
 		try {
@@ -157,6 +158,8 @@ public class UserController {
 			httpStatus = HttpStatus.OK;
 			if (isOtpSend) {
 				response.setOtp("OTP Send To Phone Successfully");
+			}else{
+				response.setOtp("OTP Send Failed.Please Check Phone");
 			}
 		} catch (Exception e) {
 			httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;

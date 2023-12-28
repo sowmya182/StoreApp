@@ -4,6 +4,7 @@ import com.kosuri.stores.model.enums.Role;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.springframework.boot.convert.DataSizeUnit;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.RequestEntity;
@@ -12,6 +13,7 @@ import java.net.URI;
 
 @Getter
 @Setter
+@ToString
 public class AddTabStoreUserRequest extends RequestEntity<AddTabStoreUserRequest> {
     public AddTabStoreUserRequest(HttpMethod method, URI url) {
         super(method, url);

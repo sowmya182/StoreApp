@@ -24,7 +24,7 @@ public class TabStoreUserEntity {
     @NotNull
     private @Column(name = "store_user_phonenumber", unique=true) String storeUserContact;
     @NotNull
-    private @Column(name = "store_user_emailid") String storeUserEmail;
+    private @Column(name = "store_user_emailid", unique = true) String storeUserEmail;
 
 	@Column(name = "registraion_date")
 	@Temporal(TemporalType.TIMESTAMP)

@@ -48,12 +48,13 @@ public class RepositoryHandler {
 
 	@Autowired
 	private DiagnosticMasterRepository diagnosticMasterRepository;
-
-
 	@Autowired
 	private OtpHandler otpHandler;
 	@Autowired
 	private PrimaryCareCenterRepoistory primaryCareCenterRepoistory;
+
+	@Autowired
+	private PharmacistRepository pharmacistRepository;
 
 
 	public StoreEntity addStoreToRepository(@Valid StoreEntity storeEntity) throws Exception {
@@ -80,12 +81,11 @@ public class RepositoryHandler {
 	}
 
 	public void addUser(@Valid StoreEntity storeEntity, AddUserRequest request) throws Exception {
-		// TODO Update to query based on id
+
 		Optional<RoleEntity> role = roleRepository.findByRoleName(request.getRole());
 		if (!role.isPresent()) {
 			throw new APIException("Role does not exist. Please enter a valid role");
 		}
-
 		storeRepository.save(storeEntity);
 
 	}
@@ -107,7 +107,7 @@ public class RepositoryHandler {
 		return stockRepository.findByStoreId(storeId);
 	}
 
-	public boolean validateuser(AddUserRequest request) throws Exception {
+	public boolean validateUser(AddUserRequest request) throws Exception {
 		Optional<List<StoreEntity>> existingStores = storeRepository.findByOwnerEmailOrOwnerContact(request.getEmail(),
 				request.getPhoneNumber());
 		if (existingStores.isEmpty()) {
@@ -125,12 +125,9 @@ public class RepositoryHandler {
 	}
 
 	public boolean addStoreUser(@Valid TabStoreUserEntity storeEntity, AddTabStoreUserRequest request) throws Exception {
-		// TODO Update to query based on id
+
 		Optional<RoleEntity> role = roleRepository.findByRoleName(request.getRole());
 
-//		if (!role.isPresent()) {
-//			throw new APIException("Role does not exist. Please enter a valid role");
-//		}
 		TabStoreUserEntity user = tabStoreRepository.save(storeEntity);
 		if ( user.getStoreUserEmail() != null) {
 			//sets the EmailId and created Date for UserOTPEnitity
@@ -144,7 +141,7 @@ public class RepositoryHandler {
 			OTPRequest otpRequest = createOTPRequest(storeEntity.getStoreUserEmail(),storeEntity.getStoreUserContact());
 			boolean isMessageSent = sendEmailOtp(otpRequest);
 			boolean isPhoneOtpSent = sendOtpToSMS(otpRequest);
-			return true;
+			return (isMessageSent||isPhoneOtpSent);
 		}
 		return false;
     }
@@ -249,6 +246,7 @@ public class RepositoryHandler {
 		return false;
 	}
 
+
 	public boolean sendOtpToSMS(@Valid OTPRequest request) {
 		Optional<TabStoreUserEntity> tabStoreUserOptional = tabStoreRepository.findByStoreUserContact(request.getPhoneNumber());
 		TabStoreUserEntity tabStoreUserEntity = tabStoreUserOptional.orElse(null);
@@ -261,15 +259,18 @@ public class RepositoryHandler {
 	}
 
 
-	public void addDiagnosticCenter(DiagnosticServicesEntity diagnosticServicesEntity, DiagnosticCenterRequest request) {
-		diagnosticServiceRepository.save(diagnosticServicesEntity);
+	public boolean addDiagnosticCenter(DiagnosticServicesEntity diagnosticServicesEntity, DiagnosticCenterRequest request) {
+		DiagnosticServicesEntity dcEntity = diagnosticServiceRepository.save(diagnosticServicesEntity);
+		return (null!=dcEntity);
 	}
 
 	public boolean isDCActive(DiagnosticCenterRequest request) {
 		Optional<StoreEntity> storeInfoOptional = storeRepository.findById(request.getStoreId());
-		StoreEntity storeEntity = storeInfoOptional.orElse(null);
-		return (Objects.requireNonNull(storeEntity).getStatus().equalsIgnoreCase("true"));
-
+		if (storeInfoOptional.isPresent()) {
+			StoreEntity storeEntity = storeInfoOptional.get();
+			return storeEntity.getStatus().equalsIgnoreCase("Active");
+		}
+		return false;
 	}
 
 	public DiagnosticServicesEntity findServiceById(String userServiceId) {
@@ -288,9 +289,9 @@ public class RepositoryHandler {
 
 	}
 
-	public void addPrimaryCareCenter(PrimaryCareEntity primaryCareEntity, PrimaryCareUserRequest request) {
-		primaryCareCenterRepoistory.save(primaryCareEntity);
-
+	public boolean addPrimaryCareCenter(PrimaryCareEntity primaryCareEntity, PrimaryCareUserRequest request) {
+		PrimaryCareEntity pcEntity = primaryCareCenterRepoistory.save(primaryCareEntity);
+		return (null != pcEntity);
 	}
 
 	public PrimaryCareEntity findPrimaryServiceById(String userServiceId) {
@@ -310,5 +311,56 @@ public class RepositoryHandler {
 	public TabStoreUserEntity getTabStoreUser(String emailAddress, String userContactNumber) {
 		Optional<TabStoreUserEntity> tabStoreUserEntityOptional = tabStoreRepository.findByStoreUserEmailOrStoreUserContact(emailAddress,userContactNumber);
 		return tabStoreUserEntityOptional.orElse(null);
+	}
+
+	public boolean addPharmacist(PharmacistEntity entity) {
+		try{
+            pharmacistRepository.save(entity);
+            return true;
+		}catch (Exception e) {
+			return false;
+		}
+
+	}
+
+	public boolean validatePharmacist(PharmasistRequest request) throws Exception{
+
+		Optional<PharmacistEntity> pharmacistEntityOptional = pharmacistRepository
+				.findByPharmacistEmailAddressOrPharmacistContact(request.getPharmaUserEmail(), request.getPharmaUserContact());
+		if (pharmacistEntityOptional.isEmpty()) {
+			return true;
+		}
+		PharmacistEntity pharmacistEntity = pharmacistEntityOptional.orElse(null);
+		if (pharmacistEntity.getPharmacistEmailAddress().contains(request.getPharmaUserEmail())
+		|| pharmacistEntity.getPharmacistContact().contains(request.getPharmaUserContact())) {
+			throw new APIException("Pharmacist already exists in system");
+		}
+		return true;
+    }
+
+	public List<PharmacistEntity> findPharmacist(String mobileNumber,
+												 String emailAddress,
+												 String availableLocation) {
+        return pharmacistRepository.
+				findByPharmacistEmailAddressOrPharmacistContactOrPharmacistAvailableLocation(
+				emailAddress, mobileNumber,availableLocation
+		);
+	}
+
+	public boolean findPharmacistBasedOnContactNumberOrEmailAddress(String pharmaUserContact,
+																	String pharmaUserEmail) {
+		Optional<PharmacistEntity> pharmacistEntityOptional = pharmacistRepository.
+				findByPharmacistEmailAddressOrPharmacistContact(pharmaUserEmail, pharmaUserContact);
+		PharmacistEntity pharmacistEntity = pharmacistEntityOptional.orElse(null);
+		return (pharmacistEntity != null);
+	}
+
+	public boolean updatePharmacist(PharmacistEntity entity) {
+		try{
+			pharmacistRepository.save(entity);
+			return true;
+		}catch (Exception e) {
+			return false;
+		}
 	}
 }

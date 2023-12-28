@@ -16,19 +16,20 @@ public class DiagnosticHandler {
     private RepositoryHandler repositoryHandler;
 
     public boolean addDiagnosticCenter(DiagnosticCenterRequest request) throws Exception {
-        boolean isDCActive = false;
+        boolean isDCActive = true;
         if (!repositoryHandler.isDCActive(request)){
+            isDCActive =  false;
             return false;
         }
 
         DiagnosticServicesEntity diagnosticServicesEntity = getDiagnosticServicesEntityFromDiagnosticRequest(request, isDCActive);
-
+        boolean isDcAdded = false;
         try {
-            repositoryHandler.addDiagnosticCenter(diagnosticServicesEntity,request);
+           isDcAdded =  repositoryHandler.addDiagnosticCenter(diagnosticServicesEntity,request);
         } catch (DataIntegrityViolationException e) {
             throw new Exception(e.getCause().getCause().getMessage());
         }
-        return true;
+        return isDcAdded;
     }
 
     private DiagnosticServicesEntity getDiagnosticServicesEntityFromDiagnosticRequest(DiagnosticCenterRequest request, boolean isDCActive) {

@@ -2,6 +2,7 @@ package com.kosuri.stores.model.request;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.RequestEntity;
 
@@ -9,6 +10,7 @@ import java.net.URI;
 
 @Getter
 @Setter
+@ToString
 public class DiagnosticCenterRequest extends RequestEntity<DiagnosticCenterRequest> {
 
 

@@ -11,21 +11,27 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/primaryCare")
 public class PrimaryCareController {
     @Autowired
     PrimaryCareHandler userHandler;
 
 
-    @PostMapping("/addPrimaryCare")
+    @PostMapping("/addPrimaryCareCenter")
     public ResponseEntity<GenericResponse> addPrimaryCare(@Valid @RequestBody PrimaryCareUserRequest request) {
 
         HttpStatus httpStatus;
         GenericResponse response = new GenericResponse();
+        boolean isPcAdded = false;
         try {
-            userHandler.addPrimaryCare(request);
+            isPcAdded =  userHandler.addPrimaryCare(request);
             httpStatus = HttpStatus.OK;
-            response.setResponseMessage("Primary Care Centre added successfully");
+            if (isPcAdded){
+                response.setResponseMessage("Primary Care Centre added successfully");
+            } else{
+                response.setResponseMessage("Primary Care Centre Cannot be added.");
+            }
+
         }
         catch (APIException e) {
             httpStatus = HttpStatus.BAD_REQUEST;

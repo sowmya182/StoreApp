@@ -21,13 +21,13 @@ private RepositoryHandler  repositoryHandler;
         }
 
         PrimaryCareEntity primaryCareEntity = setEntityFromPrimaryCareRequest(request);
-
+        boolean isPCAdded = false;
             try {
-                repositoryHandler.addPrimaryCareCenter(primaryCareEntity, request);
+                isPCAdded =  repositoryHandler.addPrimaryCareCenter(primaryCareEntity, request);
             } catch (DataIntegrityViolationException e) {
                 throw new Exception(e.getCause().getCause().getMessage());
             }
-            return true;
+            return isPCAdded;
 
     }
 
