@@ -104,6 +104,8 @@ public class UserHandler {
         boolean isPasswordUpdated = repositoryHandler.updatePassword(tabStoreUserEntity);
         if (isPasswordUpdated) {
             response.setResponseMessage("Password Updated Successfully");
+        }else{
+            response.setResponseMessage("Unable To Update Password.");
         }
     }
 
@@ -118,6 +120,8 @@ public class UserHandler {
                 otpRequest.setIsForgetPassword(true);
                sendOTP(request, otpRequest);
                response.setResponseMessage("Forget Password Initiated");
+            } else{
+                response.setResponseMessage("Unable to Initiated Forget Password.");
             }
         }
         return response;

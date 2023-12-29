@@ -10,8 +10,8 @@ import java.util.List;
 @Getter
 @Setter
 public class SearchResponse extends GenericResponse {
-    private List<SearchResult> searchResultList;
 
+    private List<SearchResult> searchResultList;
     private List<PharmasistSearchResult> pharmasistSearchResults;
 }
 

@@ -73,14 +73,16 @@ public class UserController {
 			httpStatus = HttpStatus.OK;
 			if (isUserAdded){
 				response.setResponseMessage("User added successfully and Otp Send to the User Email and Mobile");
+			}else{
+				response.setResponseMessage("Error While Adding Store User.");
 			}
 
 		} catch (APIException e) {
 			httpStatus = HttpStatus.BAD_REQUEST;
-			response.setResponseMessage(e.getMessage());
+			response.setResponseMessage("Error While Adding Store User.");
 		} catch (Exception e) {
 			httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-			response.setResponseMessage(e.getMessage());
+			response.setResponseMessage("Error While Adding Store User.");
 		}
 
 		return ResponseEntity.status(httpStatus).body(response);
@@ -179,7 +181,7 @@ public class UserController {
 			if (isEmailVerified) {
 				response.setResponseMessage("Email Verification Success");
 			} else if(StoreConstants.IS_EMAIL_ALREADY_VERIFIED){
-				response.setResponseMessage("Email Already Verified");
+				response.setResponseMessage("User Already Verified");
 			}else{
 				response.setResponseMessage("Invalid Otp");
 			}
@@ -201,6 +203,10 @@ public class UserController {
 			httpStatus = HttpStatus.OK;
 			if (isEmailVerified) {
 				response.setResponseMessage("SMS Verification Success");
+			}else if(StoreConstants.IS_EMAIL_ALREADY_VERIFIED){
+				response.setResponseMessage("User Already Verified");
+			}else{
+				response.setResponseMessage("Invalid Otp");
 			}
 		} catch (Exception e) {
 			httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;

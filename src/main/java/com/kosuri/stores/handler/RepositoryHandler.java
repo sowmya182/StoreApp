@@ -200,8 +200,10 @@ public class RepositoryHandler {
                     return userOtpEntity.getActive() != null
                             && userOtpEntity.getActive() == 1;
 				} else {
-					StoreConstants.IS_EMAIL_ALREADY_VERIFIED = userOtpEntity.isEmailVerify();
-					if (!userOtpEntity.isEmailVerify()) {
+                    if (userOtpEntity.isEmailVerify() || userOtpEntity.getActive() == 1) {
+                        StoreConstants.IS_EMAIL_ALREADY_VERIFIED = true;
+                    }
+                    if (!userOtpEntity.isEmailVerify()) {
 						userOtpEntity.setEmailVerify(true);
 						userOtpEntity.setActive(1);
 						userOtpEntity.setUpdatedOn(LocalTime.now().toString());
@@ -223,6 +225,9 @@ public class RepositoryHandler {
 				return userOtpEntity.getActive() != null
 						&& userOtpEntity.getActive() == 1;
 			} else{
+				if (userOtpEntity.getActive() == 1) {
+					StoreConstants.IS_EMAIL_ALREADY_VERIFIED = true;
+				}
 				userOtpEntity.setSmsVerify(true);
 				userOtpEntity.setActive(1);
 				userOtpEntity.setUpdatedOn(LocalTime.now().toString());

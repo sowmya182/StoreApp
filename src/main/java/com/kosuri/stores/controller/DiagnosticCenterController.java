@@ -28,7 +28,7 @@ public class DiagnosticCenterController {
             if (isDcAdded){
                 response.setResponseMessage("Diagnostic Center added successfully");
             } else{
-                response.setResponseMessage("Unable To Add Diagnostic Center Cannot");
+                response.setResponseMessage("Unable To Add Diagnostic Center");
             }
 
         } catch (APIException e) {
