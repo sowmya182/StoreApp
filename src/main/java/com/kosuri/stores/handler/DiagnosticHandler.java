@@ -1,19 +1,26 @@
 package com.kosuri.stores.handler;
 
 
+import com.kosuri.stores.dao.DiagnosticServiceRepository;
 import com.kosuri.stores.dao.DiagnosticServicesEntity;
 import com.kosuri.stores.model.request.DiagnosticCenterRequest;
+import com.kosuri.stores.model.response.GetAllDiagnosticCentersResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class DiagnosticHandler {
 
     @Autowired
     private RepositoryHandler repositoryHandler;
+
+    @Autowired
+    private DiagnosticServiceRepository diagnosticServiceRepository;
 
     public boolean addDiagnosticCenter(DiagnosticCenterRequest request) throws Exception {
         boolean isDCActive = true;
@@ -89,5 +96,20 @@ public class DiagnosticHandler {
         }
 
         return isUpdated;
+    }
+
+    public GetAllDiagnosticCentersResponse getAllDiagnosticCenters() {
+        GetAllDiagnosticCentersResponse response = new GetAllDiagnosticCentersResponse();
+        List<DiagnosticServicesEntity> diagnosticServices = new ArrayList<>();
+        diagnosticServiceRepository.findAll().forEach(diagnosticCenter -> diagnosticServices.add(diagnosticCenter));
+        response.setDiagnosticCenters(diagnosticServices);
+        return response;
+    }
+
+    public GetAllDiagnosticCentersResponse getDiagnosticCenterByLocationOrUserId(String location, String userId) {
+        List<DiagnosticServicesEntity> diagnosticCenters = diagnosticServiceRepository.findByLocationOrUserId(location, userId);
+        GetAllDiagnosticCentersResponse response = new GetAllDiagnosticCentersResponse();
+        response.setDiagnosticCenters(diagnosticCenters);
+        return response;
     }
 }

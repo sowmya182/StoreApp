@@ -12,6 +12,7 @@ import java.util.List;
 public class SearchResponse extends GenericResponse {
 
     private List<SearchResult> searchResultList;
+
     private List<PharmasistSearchResult> pharmasistSearchResults;
 }
 

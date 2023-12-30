@@ -1,20 +1,25 @@
 package com.kosuri.stores.handler;
 
-import com.kosuri.stores.dao.DiagnosticServicesEntity;
+import com.kosuri.stores.dao.PrimaryCareCenterRepository;
 import com.kosuri.stores.dao.PrimaryCareEntity;
-import com.kosuri.stores.model.request.DiagnosticCenterRequest;
 import com.kosuri.stores.model.request.PrimaryCareUserRequest;
+import com.kosuri.stores.model.response.GetAllPrimaryCareCentersResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class PrimaryCareHandler {
 
 @Autowired
 private RepositoryHandler  repositoryHandler;
+
+@Autowired
+private PrimaryCareCenterRepository primaryCareCenterRepository;
         public boolean addPrimaryCare(PrimaryCareUserRequest request) throws Exception {
         if(!repositoryHandler.isPCActive(request)) {
             return false;
@@ -80,6 +85,24 @@ private RepositoryHandler  repositoryHandler;
         }
 
         return isUpdated;
+    }
+
+    public GetAllPrimaryCareCentersResponse getAllPrimaryCareCenters() {
+        GetAllPrimaryCareCentersResponse response = new GetAllPrimaryCareCentersResponse();
+        List<PrimaryCareEntity> primaryCareEntities = new ArrayList<>();
+        primaryCareCenterRepository.findAll().forEach(primaryCareCenter -> primaryCareEntities.add(primaryCareCenter));
+        response.setPrimaryCareCenters(primaryCareEntities);
+        return response;
+
+    }
+
+    public GetAllPrimaryCareCentersResponse getPrimaryCareCenterByLocationOrUserId(String location, String userId) {
+            List<PrimaryCareEntity> primaryCareCenters = primaryCareCenterRepository.
+                    findByLocationOrUserId(location, userId);
+            GetAllPrimaryCareCentersResponse response = new GetAllPrimaryCareCentersResponse();
+            response.setPrimaryCareCenters(primaryCareCenters);
+            return response;
+
     }
 }
 

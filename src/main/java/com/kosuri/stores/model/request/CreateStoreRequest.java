@@ -12,6 +12,7 @@ import java.net.URI;
 
 @Getter
 @Setter
+@ToString
 public class CreateStoreRequest extends RequestEntity<CreateStoreRequest> {
     public CreateStoreRequest(HttpMethod method, URI url) {
         super(method, url);
@@ -38,25 +39,4 @@ public class CreateStoreRequest extends RequestEntity<CreateStoreRequest> {
     private String location;
     private String expirationDate;
     private String storeVerificationStatus;
-
-    @Override
-    public String toString() {
-        return "CreateStoreRequest{" +
-                "storeType='" + storeType + '\'' +
-                ", id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", pincode='" + pincode + '\'' +
-                ", district='" + district + '\'' +
-                ", town='" + town + '\'' +
-                ", state='" + state + '\'' +
-                ", owner='" + owner + '\'' +
-                ", ownerAddress='" + ownerAddress + '\'' +
-                ", ownerContact='" + ownerContact + '\'' +
-                ", secondaryContact='" + secondaryContact + '\'' +
-                ", ownerEmail='" + ownerEmail + '\'' +
-                ", location='" + location + '\'' +
-                ", expirationDate='" + expirationDate + '\'' +
-                ", storeVerificationStatus='" + storeVerificationStatus + '\'' +
-                '}';
-    }
 }

@@ -174,31 +174,18 @@ public class StoreHandler {
     }
 
     boolean validateStoreInputs(CreateStoreRequest request) throws Exception{
-        Optional<StoreEntity> store = storeRepository.findById(request.getId());
-        if(store.isPresent()){
-            throw new APIException("Store with id is already present in system");
+        boolean isStorePresent = repositoryHandler.isStorePresent(request);
+        if(isStorePresent){
+           throw new APIException("Store Is Already Present In System");
         }
 
-        if(request.getOwnerEmail() != null && !request.getOwnerEmail().isEmpty()
-                && request.getOwnerContact() != null && !request.getOwnerContact().isEmpty()
-        && request.getExpirationDate()!=null && !request.getExpirationDate().isEmpty()){
-            Optional<List<StoreEntity>> store2 = storeRepository.findByOwnerEmailOrOwnerContact(request.getOwnerEmail(), request.getOwnerContact());
-            if(!store2.get().isEmpty()){
-                for(StoreEntity s: store2.get()){
-                    if(!s.getId().contains("DUMMY")){
-                        throw new APIException("Store with owner email/contact is already present in system");
-                    }
-                }
+        if(request.getOwnerEmail() != null && !request.getOwnerEmail().isEmpty() &&
+                request.getOwnerContact() != null && !request.getOwnerContact().isEmpty() &&
+                request.getExpirationDate()!=null && !request.getExpirationDate().isEmpty()){
+            boolean isOwnerPresent = repositoryHandler.isOwnerPresent(request.getOwnerEmail(), request.getOwnerContact());
+            if (!isOwnerPresent){
+                throw new APIException("Owner Not Found");
             }
-//            boolean isUserPresent = false;
-//            if(!store2.get().isEmpty()){
-//                for(StoreEntity s: store2.get()){
-//                    if (s.getId().contains("DUMMY") && s.getRole().equals("STORE_MANAGER")) {
-//                        isUserPresent = true;
-//                        break;
-//                    }
-//                }
-//            }
             LocalDate currentDate = LocalDate.now();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             String expirationDateString = request.getExpirationDate();
@@ -207,10 +194,6 @@ public class StoreHandler {
                 throw new APIException("Cannot Add Store As Store Licence Expired.");
             }
 
-//            if(!isUserPresent){
-//                throw new APIException("Store owner not present as user in system");
-//
-//            }
         }
         return true;
     }

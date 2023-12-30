@@ -51,7 +51,7 @@ public class RepositoryHandler {
 	@Autowired
 	private OtpHandler otpHandler;
 	@Autowired
-	private PrimaryCareCenterRepoistory primaryCareCenterRepoistory;
+	private PrimaryCareCenterRepository primaryCareCenterRepository;
 
 	@Autowired
 	private PharmacistRepository pharmacistRepository;
@@ -295,17 +295,17 @@ public class RepositoryHandler {
 	}
 
 	public boolean addPrimaryCareCenter(PrimaryCareEntity primaryCareEntity, PrimaryCareUserRequest request) {
-		PrimaryCareEntity pcEntity = primaryCareCenterRepoistory.save(primaryCareEntity);
+		PrimaryCareEntity pcEntity = primaryCareCenterRepository.save(primaryCareEntity);
 		return (null != pcEntity);
 	}
 
 	public PrimaryCareEntity findPrimaryServiceById(String userServiceId) {
-		Optional<PrimaryCareEntity> primaryCareEntityOptional = primaryCareCenterRepoistory.findById(userServiceId);
+		Optional<PrimaryCareEntity> primaryCareEntityOptional = primaryCareCenterRepository.findById(userServiceId);
 		return primaryCareEntityOptional.orElse(null);
 	}
 
 	public void savePrimaryServiceEntity(PrimaryCareEntity serviceEntity) {
-		primaryCareCenterRepoistory.save(serviceEntity);
+		primaryCareCenterRepository.save(serviceEntity);
 	}
 
 	public boolean updatePassword(TabStoreUserEntity tabStoreUserEntity) {
@@ -367,5 +367,21 @@ public class RepositoryHandler {
 		}catch (Exception e) {
 			return false;
 		}
+	}
+
+	public boolean isStorePresent(CreateStoreRequest request) {
+		Optional<StoreEntity> storeEntity = storeRepository.findByPincodeAndDistrictAndStateAndLocation(
+				request.getPincode(),
+				request.getDistrict(),
+				request.getState(),
+				request.getLocation()
+		);
+		return storeEntity.isPresent();
+	}
+
+	public boolean isOwnerPresent(String ownerEmail, String ownerContact) {
+		Optional<TabStoreUserEntity> storeUserEntity = tabStoreRepository.
+				findByStoreUserEmailOrStoreUserContact(ownerEmail,ownerContact);
+		return storeUserEntity.isPresent();
 	}
 }
