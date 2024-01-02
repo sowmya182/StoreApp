@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface DiagnosticServiceRepository extends JpaRepository<DiagnosticServicesEntity, String> {
-    List<DiagnosticServicesEntity> findByLocationOrUserId(String location, String userId);
+    List<DiagnosticServicesEntity> findByUserId(String location, String userId);
 }
