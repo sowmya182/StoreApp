@@ -107,7 +107,7 @@ public class DiagnosticHandler {
     }
 
     public GetAllDiagnosticCentersResponse getDiagnosticCenterByLocationOrUserId(String location, String userId) {
-        List<DiagnosticServicesEntity> diagnosticCenters = diagnosticServiceRepository.findByUserId(location, userId);
+        List<DiagnosticServicesEntity> diagnosticCenters = diagnosticServiceRepository.findByUserId(userId);
         GetAllDiagnosticCentersResponse response = new GetAllDiagnosticCentersResponse();
         response.setDiagnosticCenters(diagnosticCenters);
         return response;
