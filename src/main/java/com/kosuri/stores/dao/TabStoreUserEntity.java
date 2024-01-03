@@ -1,5 +1,5 @@
 package com.kosuri.stores.dao;
-//
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -8,10 +8,12 @@ import javax.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 @Getter
 @Setter
+@ToString
 @Entity
 @Table(name = "tab_store_user_login")
 public class TabStoreUserEntity {

@@ -70,7 +70,8 @@ public class UserHandler {
         storeEntity.setStoreAdminContact(request.getStoreAdminMobile());
         storeEntity.setStoreAdminEmail(request.getStoreAdminEmail());
         storeEntity.setPassword(getEncryptedPassword(request.getPassword()));
-        storeEntity.setUserType((null!=request.getUserType())?request.getUserType(): UserType.SA.toString());
+        storeEntity.setUserType((null!=request.getUserType())?
+                request.getUserType(): UserType.SA.toString());
         storeEntity.setRegistrationDate(LocalDateTime.now());
         storeEntity.setUserId(genereateUserId());
 

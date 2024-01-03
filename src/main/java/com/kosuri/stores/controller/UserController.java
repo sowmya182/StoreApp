@@ -74,17 +74,16 @@ public class UserController {
 			if (isUserAdded){
 				response.setResponseMessage("User added successfully and Otp Send to the User Email and Mobile");
 			}else{
-				response.setResponseMessage("Error While Adding Store User.");
+				response.setResponseMessage("Unable To Add User. Please Try Again");
 			}
 
 		} catch (APIException e) {
 			httpStatus = HttpStatus.BAD_REQUEST;
-			response.setResponseMessage("Error While Adding Store User.");
+			response.setResponseMessage(e.getMessage());
 		} catch (Exception e) {
 			httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-			response.setResponseMessage("Error While Adding Store User.");
+			response.setResponseMessage("Error While Adding Store User");
 		}
-
 		return ResponseEntity.status(httpStatus).body(response);
 	}
 

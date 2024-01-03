@@ -183,7 +183,8 @@ public class RepositoryHandler {
 			return true;
 		}
 		TabStoreUserEntity tabStoreUserEntity = tabStoreUserEntityOptional.orElse(null);
-			if (tabStoreUserEntity.getStoreUserEmail().contains(request.getUserEmail())) {
+			if (tabStoreUserEntity.getStoreUserEmail().contains(request.getUserEmail())||
+			tabStoreUserEntity.getStoreUserContact().contains(request.getUserPhoneNumber())) {
 				System.out.println("User already exists in system");
 				throw new APIException("User already exists in system");
 			}
@@ -245,8 +246,8 @@ public class RepositoryHandler {
 				null != tabStoreUserEntity.getUserType() &&
 				tabStoreUserEntity.getUserType().equalsIgnoreCase(UserType.SA.toString())) {
 			String storeUserEmail = request.getEmail();
-			return (request.getIsForgetPassword() ? otpHandler.sendOtpToEmail(storeUserEmail, true):
-					otpHandler.sendOtpToEmail(storeUserEmail, false));
+			return (request.getIsForgetPassword() ? otpHandler.sendOtpToEmail(storeUserEmail, true, false):
+					otpHandler.sendOtpToEmail(storeUserEmail, false, false));
 		}
 		return false;
 	}
