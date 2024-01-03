@@ -7,5 +7,5 @@ import java.util.List;
 
 @Repository
 public interface PrimaryCareCenterRepository extends JpaRepository<PrimaryCareEntity,String> {
-    List<PrimaryCareEntity> findByLocationOrUserId(String location, String userId);
+    List<PrimaryCareEntity> findByUserId(String userId);
 }

@@ -28,6 +28,9 @@ public class StoreHandler {
     @Autowired
     private StoreRepository storeRepository;
 
+    @Autowired
+    private OtpHandler otpHandler;
+
     private final S3Client s3Client;
 
 
@@ -39,6 +42,10 @@ public class StoreHandler {
         if(validateStoreInputs(createStoreRequest)) {
            // uploadFileToS3Bucket(file);
             StoreEntity storeEntity = repositoryHandler.addStoreToRepository(createStoreEntityFromRequest(createStoreRequest));
+
+            if (null != storeEntity){
+                otpHandler.sendOtpToEmail(storeEntity.getOwnerEmail(), false, true);
+            }
         }
         return createStoreRequest.getId();
     }

@@ -1,8 +1,7 @@
 package com.kosuri.stores.handler;
 
 
-import com.kosuri.stores.dao.UserOTPEntity;
-import com.kosuri.stores.dao.UserOTPRepository;
+import com.kosuri.stores.dao.*;
 import com.kosuri.stores.template.EmailTemplate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,33 +25,66 @@ public class OtpHandler {
 
     @Autowired
     private UserOTPRepository userOtpRepository;
+    @Autowired
+    private StoreRepository storeRepository;
 
 
-    public boolean sendOtpToEmail(String email, Boolean isForgetPassword) {
-        //Generate The Template to send OTP
-        Optional<UserOTPEntity> userOtpOptional = userOtpRepository.findByUserEmail(email);
-        String otp = OtpHandler.generateOTP(true);
-        EmailTemplate template = new EmailTemplate("static/send-otp.html");
-        Map<String, String> replacements = new HashMap<>();
+    public boolean sendOtpToEmail(String email, Boolean isForgetPassword, boolean isNotification) {
+        if (isNotification){
+            Optional<List<StoreEntity>> storeDetails = storeRepository.findByOwnerEmail(email);
+            String location = getLocationDetails(storeDetails);
+            EmailTemplate template = new EmailTemplate("static/send-notification.html");
+            Map<String, String> replacements = new HashMap<>();
 
-        replacements.put("user", email);
-        replacements.put("otp", otp);
-        String message = template.getTemplate(replacements);
-        boolean messageSent = emailService.sendEmailMessage(email, message, "OTP For RxWala");
-        if (messageSent) {
-            UserOTPEntity userOtp = new UserOTPEntity();
-            if (userOtpOptional.isPresent()) {
-                userOtp = userOtpOptional.get();
-                if (isForgetPassword){
-                    userOtp.setForgetPasswordOtp(otp);
-                }else{
-                    userOtp.setEmailOtp(otp);
+            replacements.put("user", email);
+            replacements.put("location", location);
+            String message = template.getTemplate(replacements);
+           return emailService.sendEmailMessage(email, message, "Notification From RxKolan");
+        } else {
+            Optional<UserOTPEntity> userOtpOptional = userOtpRepository.findByUserEmail(email);
+            String otp = OtpHandler.generateOTP(true);
+            boolean messageSent;
+            EmailTemplate template = new EmailTemplate("static/send-otp.html");
+            Map<String, String> replacements = new HashMap<>();
+
+            replacements.put("user", email);
+            replacements.put("otp", otp);
+            String message = template.getTemplate(replacements);
+            messageSent =  emailService.sendEmailMessage(email, message, "OTP For RxWala");
+            if (messageSent) {
+                UserOTPEntity userOtp = new UserOTPEntity();
+                if (userOtpOptional.isPresent()) {
+                    userOtp = userOtpOptional.get();
+                    if (isForgetPassword){
+                        userOtp.setForgetPasswordOtp(otp);
+                    }else{
+                        userOtp.setEmailOtp(otp);
+                    }
+                    userOtp.setEmailOtpDate(new Date());
                 }
-                userOtp.setEmailOtpDate(new Date());
+                userOtpRepository.save(userOtp);
             }
-            userOtpRepository.save(userOtp);
+            return messageSent;
         }
-        return messageSent;
+    }
+
+
+    private String getLocationDetails(Optional<List<StoreEntity>> storeDetails) {
+        StringBuilder location = new StringBuilder();
+
+        if (storeDetails.isPresent()) {
+            for (StoreEntity store : storeDetails.get()) {
+                if (store.getLocation() != null && !store.getLocation().isEmpty()) {
+                    location.append(store.getLocation()).append("; ");
+                }
+            }
+        }
+
+        if (location.length() > 2) {
+            location.setLength(location.length() - 2);
+        }
+
+        return location.toString();
     }
 
     public boolean sendOtpToPhoneNumber(String phoneNumber) {
