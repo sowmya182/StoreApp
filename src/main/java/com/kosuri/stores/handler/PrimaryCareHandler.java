@@ -98,7 +98,7 @@ private PrimaryCareCenterRepository primaryCareCenterRepository;
 
     public GetAllPrimaryCareCentersResponse getPrimaryCareCenterByLocationOrUserId(String location, String userId) {
             List<PrimaryCareEntity> primaryCareCenters = primaryCareCenterRepository.
-                    findByLocationOrUserId(location, userId);
+                    findByUserId(userId);
             GetAllPrimaryCareCentersResponse response = new GetAllPrimaryCareCentersResponse();
             response.setPrimaryCareCenters(primaryCareCenters);
             return response;
